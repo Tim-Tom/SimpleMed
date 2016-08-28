@@ -4,6 +4,4 @@ BEGIN;
 
 CREATE SCHEMA app;
 
--- XXX Add DDLs here.
-
 COMMIT;

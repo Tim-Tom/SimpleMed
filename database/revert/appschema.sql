@@ -4,6 +4,4 @@ BEGIN;
 
 DROP SCHEMA app;
 
--- XXX Add DDLs here.
-
 COMMIT;

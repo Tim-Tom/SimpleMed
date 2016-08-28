@@ -3,3 +3,4 @@
 %uri=https://github.com/Tim-Tom/SimpleMed
 
 appschema 2016-08-28T02:02:00Z Tim Bollman <tbollman@kevdenti.com> # Add schema for main application to database.
+auditschema 2016-08-28T02:13:01Z Tim Bollman <tbollman@kevdenti.com> # Add schema for audit tables to databse
