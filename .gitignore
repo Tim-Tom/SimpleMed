@@ -1,0 +1,2 @@
+environments/*.yml
+!environments/sample.yml
