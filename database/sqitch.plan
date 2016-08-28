@@ -2,3 +2,4 @@
 %project=SimpleMed
 %uri=https://github.com/Tim-Tom/SimpleMed
 
+appschema 2016-08-28T02:02:00Z Tim Bollman <tbollman@kevdenti.com> # Add schema for main application to database.
