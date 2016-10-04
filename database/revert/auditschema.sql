@@ -2,6 +2,6 @@
 
 BEGIN;
 
-DROP SCHEMA app;
+DROP SCHEMA audit;
 
 COMMIT;

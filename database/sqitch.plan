@@ -3,4 +3,9 @@
 %uri=https://github.com/Tim-Tom/SimpleMed
 
 appschema 2016-08-28T02:02:00Z Tim Bollman <tbollman@kevdenti.com> # Add schema for main application to database.
-auditschema 2016-08-28T02:13:01Z Tim Bollman <tbollman@kevdenti.com> # Add schema for audit tables to databse
+auditschema 2016-08-28T02:13:01Z Tim Bollman <tbollman@kevdenti.com> # Add schema for audit tables to database
+people [appschema] 2016-10-03T23:24:07Z Tim Bollman <tbollman@kevdenti.com> # Add table to hold people data
+users [appschema people] 2016-10-03T23:38:29Z Tim Bollman <tbollman@kevdenti.com> # Add table to hold user (login) data.
+insurance_info [appschema] 2016-10-03T23:46:06Z Tim Bollman <tbollman@kevdenti.com> # Table to provide information on how to contact insurers.
+insurers [appschema insurance_info people] 2016-10-03T23:51:06Z Tim Bollman <tbollman@kevdenti.com> # Add table to hold insurer info (per person insurance information).
+contacts [appschema people] 2016-10-03T23:57:04Z Tim Bollman <tbollman@kevdenti.com> # Tables relating to contacting the user.
