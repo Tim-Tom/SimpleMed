@@ -1,4 +1,4 @@
-=SimpleMed
+# SimpleMed
 
 A simple medical web application. The end goal is to support basic features that samll
 medical practices need. It is expected that there will be at most users in the low
