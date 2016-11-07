@@ -9,3 +9,5 @@ users [appschema people] 2016-10-03T23:38:29Z Tim Bollman <tbollman@kevdenti.com
 insurance_info [appschema] 2016-10-03T23:46:06Z Tim Bollman <tbollman@kevdenti.com> # Table to provide information on how to contact insurers.
 insurers [appschema insurance_info people] 2016-10-03T23:51:06Z Tim Bollman <tbollman@kevdenti.com> # Add table to hold insurer info (per person insurance information).
 contacts [appschema people] 2016-10-03T23:57:04Z Tim Bollman <tbollman@kevdenti.com> # Tables relating to contacting the user.
+herbs 2016-11-07T16:56:25Z Tim Bollman <tbollman@kevdenti.com> # Table to store base herbs.
+scripts 2016-11-07T17:12:46Z Tim Bollman <tbollman@kevdenti.com> # Medications for users.
