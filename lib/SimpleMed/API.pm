@@ -3,39 +3,57 @@ package SimpleMed::API;
 use strict;
 use warnings;
 
+use v5.22;
+
+no warnings 'experimental::signatures';
+use feature 'signatures';
+
+no warnings 'experimental::postderef';
+use feature 'postderef';
+
 use Dancer2;
+
+use SimpleMed::Core::User;
+
+sub check_session {
+  # I don't really have security permissions in place right now. It's assumed everyone who
+  # has a session is an admin at this point and has access to all the data.
+  my $role = session('role');
+  if (!defined $role) {
+    send_error "Unauthorized", 401;
+  }
+  # elsif ...
+  # send_error "Insufficient Privledges", 403;
+}
+
+sub req_login {
+  my $route = shift;
+  return sub {
+    check_session();
+    $route->();
+  };
+}
+
 set serializer => 'mutable';
 
-use Crypt::SaltedHash;
+prefix '/users' => sub {
+  post '/login' => sub {
+    my $username = param('username');
+    my $password = param('password');
 
-my $hasher = Crypt::SaltedHash->new(algorithm => 'SHA-1');
+    my $user = SimpleMed::Core::User::login($username, $password);
 
-my $demoPassword;
+    session( $_ => $user->{$_} ) foreach keys %$user;
 
-$hasher->add('password');
-$demoPassword = $hasher->generate();
-$hasher->clear();
+    return $user;
+  };
+};
 
-
-post '/login' => sub {
-  my $username = param('username');
-  my $password = param('password');
-
-  my $user = {
-    username => $username,
-    password => $demoPassword
-   };
-
-  if (!Crypt::SaltedHash->validate($user->{password}, $password)) {
-    send_error "Incorrect username or password", 401;
-  }
-
-  session(
-    user => $username,
-    role => 'user'
-   );
-
-  return $user;
+prefix '/people' => sub {
+  get '/:id' => req_login sub {
+    my $id = param('id');
+    return { id => $id };
+  };
 };
 
 true;
