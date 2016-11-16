@@ -1,5 +1,7 @@
 -- Deploy SimpleMed:herbs to pg
 
+-- [2016-11-16]: Disabled
+
 BEGIN;
 
 CREATE SEQUENCE app.seq_herbs;
