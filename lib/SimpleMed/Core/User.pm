@@ -38,7 +38,10 @@ sub pick {
 sub login($username, $password) {
   my $user = $cache{$username};
   if (!(defined $user && Crypt::SaltedHash->validate($user->{password}, $password))) {
-    send_error "Incorrect username or password", 401;
+    die {
+      message => "Incorrect username or password",
+      code => 401
+    };
   }
   return { pick($user, qw(user_id username role)) };
 }

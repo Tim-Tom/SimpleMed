@@ -13,6 +13,8 @@ use feature 'postderef';
 
 use Dancer2;
 
+use Try::Tiny;
+
 use SimpleMed::Core::User;
 
 sub check_session {
@@ -41,7 +43,12 @@ prefix '/users' => sub {
     my $username = param('username');
     my $password = param('password');
 
-    my $user = SimpleMed::Core::User::login($username, $password);
+    my $user;
+    try {
+      $user = SimpleMed::Core::User::login($username, $password);
+    } catch {
+      send_error($_->{message}, $_->{code});
+    };
 
     session( $_ => $user->{$_} ) foreach keys %$user;
 
