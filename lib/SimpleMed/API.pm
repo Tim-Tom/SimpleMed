@@ -20,7 +20,7 @@ use SimpleMed::Core::User;
 sub check_session {
   # I don't really have security permissions in place right now. It's assumed everyone who
   # has a session is an admin at this point and has access to all the data.
-  my $role = session('role');
+  my $role = session('user_id');
   if (!defined $role) {
     send_error "Unauthorized", 401;
   }

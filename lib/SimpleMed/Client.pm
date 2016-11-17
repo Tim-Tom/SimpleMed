@@ -5,16 +5,53 @@ use warnings;
 
 use Dancer2 appname => 'SimpleMed';
 
-get '/' => sub {
-  session('user') or redirect('/login');
+use Try::Tiny;
+
+sub check_session {
+  # I don't really have security permissions in place right now. It's assumed everyone who
+  # has a session is an admin at this point and has access to all the data.
+  my $role = session('user_id');
+  if (!defined $role) {
+    forward('/login', { destination => request->dispatch_path });
+  }
+  # elsif ...
+  # send_error "Insufficient Privledges", 403;
+}
+
+sub req_login(&) {
+  my $route = shift;
+  return sub {
+    check_session();
+    $route->();
+  };
+}
+
+get '/' => req_login sub {
+  template 'info';
 };
 
 get '/login' => sub {
-  template 'login';
+  template 'login', { error => '', destination => param('destination') || '/' };
 };
 
-get '/info' => sub {
-  template 'info';
+post '/login' => sub {
+  my $username = param('username');
+  my $password = param('password');
+
+  debug('here', $username, $password);
+
+  my ($user, $login_error);
+  try {
+    $user = SimpleMed::Core::User::login($username, $password);
+  } catch {
+    $login_error = "$_->{code}: $_->{message}";
+  };
+
+  return (template 'login', { error => $login_error, destination => param('destination') || '/' }) if $login_error;
+
+  session( $_ => $user->{$_} ) foreach keys %$user;
+
+  redirect param('destination') || '/';
 };
 
 true;

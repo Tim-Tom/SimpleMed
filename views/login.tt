@@ -1,0 +1,13 @@
+<div id="login-form">
+  {%
+     if ($error) {
+       return qq(<h2 id="error-alert">$error</h2>);
+     }
+  %}
+  <form action="/login" method="POST">
+    Username: <input type="text" name="username" />
+    Password: <input type="password" name="password" />
+    <input type="hidden" name="destination" value="{% $destination || '/' %}" />
+    <input type="submit" value="Login" />
+  </form>
+</div>
