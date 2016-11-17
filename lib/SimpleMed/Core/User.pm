@@ -5,6 +5,8 @@ use v5.22;
 use strict;
 use warnings;
 
+use Dancer2;
+
 no warnings 'experimental::signatures';
 use feature 'signatures';
 
@@ -15,22 +17,26 @@ use Crypt::SaltedHash;
 
 my $hasher = Crypt::SaltedHash->new(algorithm => 'SHA-1');
 
-$hasher->add('password');
-my $demoPassword = $hasher->generate();
-$hasher->clear();
-
-our %cache = (
-  tbollman => {
-    user_id  => 1,
-    username => 'tbollman',
-    password => $demoPassword,
-    role => 'admin'
-   }
-);
+our %cache;
 
 sub pick {
   my ($hash, @keys) = @_;
   return map { $_ => $hash->{$_} } @keys;
+}
+
+sub omit {
+  my ($hash, @keys) = @_;
+  return map { $_ => $hash->{$_} } grep { my $k = $_; !grep { $_  eq $k } @keys } keys %$hash;
+}
+
+sub load($dbh) {
+  my $sth = $dbh->prepare('SELECT user_id, username, password, status FROM app.users') or die {message => $dbh->errstr, code => 500 };
+  $sth->execute() or die {message => $sth->errstr, code => 500 };
+  while(my $user = $sth->fetchrow_hashref()) {
+    $cache{$user->{username}} = $user;
+  }
+  debug("tbollman I loaded the following users", \%cache);
+  return scalar keys %cache;
 }
 
 sub login($username, $password) {
@@ -41,5 +47,7 @@ sub login($username, $password) {
       code => 401
     };
   }
-  return { pick($user, qw(user_id username role)) };
+  return { omit($user, qw(password)) };
 }
+
+1;

@@ -6,10 +6,14 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use SimpleMed::Client;
+use SimpleMed::Core;
 use SimpleMed::API;
 
 use Plack::Builder;
 use Dancer2;
+use Dancer2::Plugin::Database;
+
+SimpleMed::Core::load_all(database());
 
 builder {
   enable 'Deflater';

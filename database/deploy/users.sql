@@ -17,7 +17,7 @@ VALUES
 CREATE TABLE app.users (
     user_id     INT          NOT NULL,
     username    VARCHAR(50)  NOT NULL,
-    password    CHAR(32)     NOT NULL,
+    password    CHAR(38)     NOT NULL,
     status      VARCHAR(50)  NOT NULL,
     PRIMARY KEY (user_id),
     CONSTRAINT UK_username UNIQUE (username),
