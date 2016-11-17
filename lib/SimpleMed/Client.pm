@@ -47,7 +47,7 @@ post '/login' => sub {
     $login_error = "$_->{code}: $_->{message}";
   };
 
-  return (template 'login', { error => $login_error, destination => param('destination') || '/' }) if $login_error;
+  return (template 'login', { banner => { type => 'notification', message => $login_error }, destination => param('destination') || '/' }) if $login_error;
 
   session( $_ => $user->{$_} ) foreach keys %$user;
 

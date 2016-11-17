@@ -1,9 +1,5 @@
+{% Text::Template::fill_in_file("$settings{views}/partials/banner.tt", DELIMITERS => ['{%', '%}'], PACKAGE => __PACKAGE__); %}
 <div id="login-form">
-  {%
-     if ($error) {
-       return qq(<h2 id="error-alert">$error</h2>);
-     }
-  %}
   <form action="/login" method="POST">
     Username: <input type="text" name="username" />
     Password: <input type="password" name="password" />

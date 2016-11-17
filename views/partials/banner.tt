@@ -1,0 +1,11 @@
+{%
+  if (%banner) {
+    return <<"END";
+<div id="alert-$banner{type}">
+  <h2 id="alert-$banner{type}-message">$banner{message}</h2>
+</div>
+END
+  } else {
+    return '';
+  }
+%}

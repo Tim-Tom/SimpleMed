@@ -26,13 +26,46 @@ a:hover {
     text-decoration: none;
 }
 
-#error-alert {
-    color: #550000;
+#alert-error {
     border: 3px solid #FF0000;
-    background-color: rgba(192, 0, 0, 0.6);
-    padding: 5px;
+    background-color: rgba(192, 0, 0, 0.4);
+    margin-top: 10px;
     margin-left: 25px;
+    margin-bottom: 10px;
     width: 640px;
+}
+
+#alert-error-message {
+    color: #550000;
+    margin: 5px;
+}
+
+#alert-warning {
+    border: 3px solid #FFFF00;
+    background-color: rgba(192, 192, 0, 0.4);
+    margin-top: 10px;
+    margin-left: 25px;
+    margin-bottom: 10px;
+    width: 640px;
+}
+
+#alert-warning-message {
+    color: #CC8800;
+    margin: 5px;
+}
+
+#alert-notification {
+    border: 3px solid #0000FF;
+    background-color: rgba(00, 64, 192, 0.4);
+    margin-top: 10px;
+    margin-left: 25px;
+    margin-bottom: 10px;
+    width: 640px;
+}
+
+#alert-notification-message {
+    color: #003366;
+    margin: 5px;
 }
 
 #page {
