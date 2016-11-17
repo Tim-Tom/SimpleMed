@@ -7,8 +7,6 @@ use Dancer2 appname => 'SimpleMed';
 
 get '/' => sub {
   session('user') or redirect('/login');
-
-  print "Got Here?!?";
 };
 
 get '/login' => sub {
