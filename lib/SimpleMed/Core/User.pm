@@ -35,7 +35,6 @@ sub load($dbh) {
   while(my $user = $sth->fetchrow_hashref()) {
     $cache{$user->{username}} = $user;
   }
-  debug("tbollman I loaded the following users", \%cache);
   return scalar keys %cache;
 }
 

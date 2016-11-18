@@ -11,7 +11,7 @@ use feature 'signatures';
 no warnings 'experimental::postderef';
 use feature 'postderef';
 
-use Dancer2;
+use Dancer2 appname => 'SimpleMedAPI';
 
 use Try::Tiny;
 

@@ -15,8 +15,10 @@ use Try::Tiny;
 
 use SimpleMed::Core::User;
 use SimpleMed::Core::Person;
+use SimpleMed::Core::Insurer;
 
 sub load_all($dbh) {
+  SimpleMed::Core::Insurer::load($dbh);
   SimpleMed::Core::Person::load($dbh);
   SimpleMed::Core::User::load($dbh);
 }
