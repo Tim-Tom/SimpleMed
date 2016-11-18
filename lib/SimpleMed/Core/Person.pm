@@ -12,8 +12,16 @@ no warnings 'experimental::postderef';
 use feature 'postderef';
 
 use SimpleMed::Core::Insurer;
+use SimpleMed::Common qw(clone omit);
 
 our %cache;
+
+sub clean_person($person) {
+  return undef if !defined $person;
+  my $new = clone $person;
+  $new->{emergency_contacts} = [map { omit($_, 'emergency_contacts') } $new->{emergency_contacts}->@*];
+  return $new;
+}
 
 sub load($dbh) {
   my $sth = $dbh->prepare('SELECT person_id, first_name, middle_name, last_name, gender, birth_date, time_zone FROM app.people') or die {message => $dbh->errstr, code => 500 };
@@ -56,22 +64,24 @@ sub load($dbh) {
   while(my ($person_id, $insurance_id, $insurance_number) = $sth->fetchrow_array()) {
     push($cache{$person_id}{insurers}->@*, { insurance_number => $insurance_number, insurer => $SimpleMed::Core::Insurer::cache{$insurance_id} });
   }
+
   return scalar keys %cache;
 }
 
 sub find_by_id($id) {
-  return $cache{$id};
+  return clean_person $cache{$id};
 }
 
 sub get {
   my @sort_keys = @_ || qw(last_name first_name middle_name);
-  return sort {
+  my @result = sort {
     foreach my $key (@sort_keys) {
       my $cmp = $a->{$key} cmp $b->{$key};
       return $cmp if $cmp;
     }
     return 0;
-  } values(%cache);
+  } map { clean_person($_) }  values(%cache);
+  return @result;
 }
 
 1;

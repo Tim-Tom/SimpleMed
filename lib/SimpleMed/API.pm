@@ -16,6 +16,7 @@ use Dancer2 appname => 'SimpleMedAPI';
 use Try::Tiny;
 
 use SimpleMed::Core::User;
+use SimpleMed::Core::Person;
 
 sub check_session {
   # I don't really have security permissions in place right now. It's assumed everyone who
@@ -52,14 +53,23 @@ prefix '/users' => sub {
 
     session( $_ => $user->{$_} ) foreach keys %$user;
 
+    $user->{session} = session()->{id};
+
     return $user;
   };
 };
 
 prefix '/people' => sub {
-  get '/:id' => req_login sub {
+  get '/' => sub {
+    return [SimpleMed::Core::Person::get()];
+  };
+  get '/:id' => sub {
     my $id = param('id');
-    return { id => $id };
+    my $result = SimpleMed::Core::Person::find_by_id($id);
+    if (!defined $result) {
+      send_error('Person does not exist', 404);
+    }
+    return $result;
   };
 };
 

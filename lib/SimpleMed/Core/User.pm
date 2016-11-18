@@ -15,19 +15,9 @@ use feature 'postderef';
 
 use Crypt::SaltedHash;
 
-my $hasher = Crypt::SaltedHash->new(algorithm => 'SHA-1');
+use SimpleMed::Common qw(omit);
 
 our %cache;
-
-sub pick {
-  my ($hash, @keys) = @_;
-  return map { $_ => $hash->{$_} } @keys;
-}
-
-sub omit {
-  my ($hash, @keys) = @_;
-  return map { $_ => $hash->{$_} } grep { my $k = $_; !grep { $_  eq $k } @keys } keys %$hash;
-}
 
 sub load($dbh) {
   my $sth = $dbh->prepare('SELECT user_id, username, password, status FROM app.users') or die {message => $dbh->errstr, code => 500 };
@@ -46,7 +36,7 @@ sub login($username, $password) {
       code => 401
     };
   }
-  return { omit($user, qw(password)) };
+  return omit($user, qw(password));
 }
 
 1;
