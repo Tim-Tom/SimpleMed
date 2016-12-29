@@ -1,0 +1,17 @@
+abstract: 'Simple Medication Engine'
+author:
+  - 'Tim Bollman <tbollman@kevdenti.com>'
+license: unlicense
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: SimpleMed
+requires:
+  Dancer2: '0'
+  Crypt::SaltedHash: '0'
+  Dancer2::Plugin::Database: '0'
+  Plack::Middleware::Deflater: '0'
+  Dancer2::Template::TextTemplate: '0'
+resources:
+  repository: https://github.com/Tim-Tom/SimpleMed
+version: '0.1'
