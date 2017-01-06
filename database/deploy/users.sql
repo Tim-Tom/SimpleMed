@@ -15,14 +15,12 @@ VALUES
     ('active', false, 'User is active');
 
 CREATE TABLE app.users (
-    user_id     INT          NOT NULL,
+    user_id     INT          NOT NULL DEFAULT nextval('app.seq_people'),
     username    VARCHAR(50)  NOT NULL,
     password    CHAR(38)     NOT NULL,
     status      VARCHAR(50)  NOT NULL,
     PRIMARY KEY (user_id),
-    CONSTRAINT UK_username UNIQUE (username),
-    CONSTRAINT FK_user_id FOREIGN KEY (user_id)
-        REFERENCES app.people (person_id)
+    CONSTRAINT UK_username UNIQUE (username)
 );
 
 COMMIT;
