@@ -19,6 +19,7 @@
     if (@$p == 0) {
       $OUT .= qq(<td>-</td>\n);
     } else {
+      $p = $p->[0]{number};
       $OUT .= qq(<td><a href="tel:$p">$p</a></td>\n);
     }
     $OUT .= qq(</tr>);
