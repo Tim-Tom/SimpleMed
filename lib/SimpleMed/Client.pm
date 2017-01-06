@@ -27,6 +27,10 @@ sub req_login(&) {
 }
 
 get '/' => req_login sub {
+  forward '/people';
+};
+
+get '/info' => req_login sub {
   template 'info';
 };
 
@@ -38,8 +42,6 @@ post '/login' => sub {
   my $username = param('username');
   my $password = param('password');
 
-  debug('here', $username, $password);
-
   my ($user, $login_error);
   try {
     $user = SimpleMed::Core::User::login($username, $password);
@@ -47,11 +49,15 @@ post '/login' => sub {
     $login_error = "$_->{code}: $_->{message}";
   };
 
-  return (template 'login', { banner => { type => 'notification', message => $login_error }, destination => param('destination') || '/' }) if $login_error;
+  return (template 'login', { banner => { type => 'notification', message => $login_error }, destination => param('destination') || '/', username => $username }) if $login_error;
 
   session( $_ => $user->{$_} ) foreach keys %$user;
 
   redirect param('destination') || '/';
+};
+
+get '/people' => req_login sub {
+  template 'people', { people => [sort { $a->{last_name} cmp $b->{last_name} || $a->{first_name} cmp $b->{first_name} || $a->{person_id} <=> $b->{person_id} } SimpleMed::Core::Person::get()] };
 };
 
 true;
