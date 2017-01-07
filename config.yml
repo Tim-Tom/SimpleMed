@@ -22,8 +22,7 @@ engines:
       caching: 0
       delimiters: [ "{%", "%}" ]
       prepend: |
-        use strict;
-        use warnings;
+        use SimpleMed::Template_Helpers qw(e ea);
       safe: 0
 
 # session engine

@@ -57,7 +57,16 @@ post '/login' => sub {
 };
 
 get '/people' => req_login sub {
-  template 'people', { people => [sort { $a->{last_name} cmp $b->{last_name} || $a->{first_name} cmp $b->{first_name} || $a->{person_id} <=> $b->{person_id} } SimpleMed::Core::Person::get()] };
+  template 'people', { people => [SimpleMed::Core::Person::get()] };
+};
+
+get '/people/:id' => req_login sub {
+  my $id = param('id');
+  my $result = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $result) {
+    send_error('Person does not exist', 404);
+  }
+  template 'person', $result;
 };
 
 true;

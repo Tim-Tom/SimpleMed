@@ -19,7 +19,9 @@ our %cache;
 sub clean_person($person) {
   return undef if !defined $person;
   my $new = clone $person;
-  $new->{emergency_contacts} = [map { omit($_, 'emergency_contacts') } $new->{emergency_contacts}->@*];
+  $new->{insurer} = clone $new->{insurer}{insurer};
+  $new->{insurer}{number} = $person->{insurer}{insurance_number};
+  $new->{emergency_contacts} = [map {my $c = omit($_->{contact}, 'emergency_contacts'); $c->{relationship} = $_->{type}; $c } $new->{emergency_contacts}->@*];
   return $new;
 }
 
@@ -31,7 +33,7 @@ sub load($dbh) {
     $person->{emails} = [];
     $person->{phones} = [];
     $person->{emergency_contacts} = [];
-    $person->{insurers} = [];
+    $person->{insurer} = {};
     $cache{$person->{person_id}} = $person;
   }
 
@@ -53,16 +55,16 @@ sub load($dbh) {
     push($cache{$person_id}{phones}->@*, {number => $phone, type => $type});
   }
 
-  $sth = $dbh->prepare('SELECT person_id, contact_id FROM app.emergency_contacts order by person_id, order_id') or die {message => $dbh->errstr, code => 500 };
+  $sth = $dbh->prepare('SELECT person_id, contact_id, type FROM app.emergency_contacts order by person_id, order_id') or die {message => $dbh->errstr, code => 500 };
   $sth->execute() or die {message => $sth->errstr, code => 500 };
-  while(my ($person_id, $contact_id) = $sth->fetchrow_array()) {
-    push($cache{$person_id}{emergency_contacts}->@*, $cache{$contact_id});
+  while(my ($person_id, $contact_id, $type) = $sth->fetchrow_array()) {
+    push($cache{$person_id}{emergency_contacts}->@*, { type => $type, contact => $cache{$contact_id} });
   }
 
   $sth = $dbh->prepare('SELECT person_id, insurance_id, insurance_number FROM app.insurers order by person_id, insurance_id') or die {message => $dbh->errstr, code => 500 };
   $sth->execute() or die {message => $sth->errstr, code => 500 };
   while(my ($person_id, $insurance_id, $insurance_number) = $sth->fetchrow_array()) {
-    push($cache{$person_id}{insurers}->@*, { insurance_number => $insurance_number, insurer => $SimpleMed::Core::Insurer::cache{$insurance_id} });
+    $cache{$person_id}{insurer} = { insurance_number => $insurance_number, insurer => $SimpleMed::Core::Insurer::cache{$insurance_id} };
   }
 
   return scalar keys %cache;
@@ -73,7 +75,7 @@ sub find_by_id($id) {
 }
 
 sub get {
-  my @sort_keys = @_ || qw(last_name first_name middle_name);
+  my @sort_keys = @_ || qw(last_name first_name middle_name id);
   my @result = sort {
     foreach my $key (@sort_keys) {
       my $cmp = $a->{$key} cmp $b->{$key};

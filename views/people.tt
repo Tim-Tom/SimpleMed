@@ -5,23 +5,13 @@
     <th>Email</th>
     <th>Phone</th>
   </tr>
-  {% for my $person (@people) {
-    my ($i, $f, $l, $e, $p) = map { $person->{$_} } qw(person_id first_name last_name emails phones);
-    $OUT .= qq(<tr>);
-    $OUT .= qq(<td><a href="/people/$i">Info</a></td>\n);
-    $OUT .= qq(<td>$f $l</td>\n);
-    if (@$e == 0) {
-      $OUT .= qq(<td>-</td>\n);
-    } else {
-      $e = $e->[0];
-      $OUT .= qq(<td><a href="mailto:$e">$e</a></td>\n);
+  {% use strict; use warnings;
+    my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/people_row.tt", DELIMITERS => ['{%', '%}'], PREPREND => $fi_prepend) or die $Text::Template::ERROR;
+    for my $person (@people) {
+      my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails phones);
+      $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
+      $data{phone} = $data{phones}[0]{number} if @{$data{emails}} > 0;
+      $OUT .= $template->fill_in(HASH => \%data);
     }
-    if (@$p == 0) {
-      $OUT .= qq(<td>-</td>\n);
-    } else {
-      $p = $p->[0]{number};
-      $OUT .= qq(<td><a href="tel:$p">$p</a></td>\n);
-    }
-    $OUT .= qq(</tr>);
-  } %}
+  %}
 </table>

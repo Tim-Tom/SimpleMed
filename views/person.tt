@@ -1,0 +1,125 @@
+<div id="person-details">
+  <h1>Personal Details</h1>
+  <table id="person-details-table">
+    <tr>
+      <th>First Name</th>
+      <td>{% e $first_name %}</td>
+    </tr>
+    <tr>
+      <th>Middle Name</th>
+      <td>{% e $middle_name %}</td>
+    </tr>
+    <tr>
+      <th>Last Name</th>
+      <td>{% e $last_name %}</td>
+    </tr>
+    <tr>
+      <th>Gender</th>
+      <td>{% e $gender %} </td>
+    </tr>
+    <tr>
+      <th>Birth Date</th>
+      <td>{% e $birth_date %}</td>
+    </tr>
+    <tr>
+      <th>Time Zone</th>
+      <td>{% e $time_zone %}</td>
+    </tr>
+  </table>
+</div>
+
+<div id="person-address">
+  <h1>Addresses</h1>
+  <table id="person-address-table">
+    {% use strict; use warnings;
+    for my $address (@addresses) {
+        my $addr_escaped = e $address->{address};
+        $OUT .= <<"END_ADDRESS";
+    <tr>
+      <th>@{[e $address->{type}]}</th>
+      <td>$addr_escaped</td>
+    </tr>
+END_ADDRESS
+      }
+    %}
+  </table>
+</div>
+
+<div id="person-phone">
+  <h1>Phone Numbers</h1>
+  <table id="person-phone-table">
+    {% use strict;
+      for my $phone (@phones) {
+        my ($t, $p) = ea($phone->{type}, $phone->{number});
+        $OUT .= <<"END_PHONE";
+    <tr>
+      <th>$t</th>
+      <td><a href="tel:$p">$p</a></td>
+    </tr>
+END_PHONE
+      }
+    %}
+  </table>
+</div>
+
+<div id="person-email">
+  <h1>Emails</h1>
+  <ul id="person-email-list">
+    {% use strict;
+      for my $email (@emails) {
+        my $e = e $email;
+        $OUT .= <<"END_EMAIL";
+    <li><a href="mailto:$e">$e</a></li>
+END_EMAIL
+      }
+    %}
+  </ul>
+</div>
+
+<div id="person-emergency">
+  <h1>Emergency Contacts</h1>
+  <table id="person-emergency-table">
+    <tr>
+      <th>Info</th>
+      <th>Relationship</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+    </tr>
+    {%
+      my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/person_contact_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
+      for my $person (@emergency_contacts) {
+        my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails relationship phones);
+        $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
+        $data{phone} = $data{phones}[0]{number} if @{$data{emails}} > 0;
+        $OUT .= $template->fill_in(HASH => \%data);
+      }
+    %}
+  </table>
+</div>
+
+<div id="person-insurance">
+  <h1>Insurance Information</h1>
+  <table id="person-insurance-table">
+    <tr>
+      <th>Company</th>
+      <td>{% e $insurer{company} %}</td>
+    </tr>
+    <tr>
+      <th>Membership Number</th>
+      <td>{% e $insurer{number} %}</td>
+    </tr>
+    <tr>
+      <th>Phone</th>
+      <td>{% e $insurer{phone} %}</td>
+    </tr>
+    <tr>
+      <th>Address</th>
+      <td>{% e $insurer{address} %}</td>
+    </tr>
+    <tr>
+      <th>Notes</th>
+      <td>{% e $insurer{notes} %}</td>
+    </tr>
+  </table>
+</div>

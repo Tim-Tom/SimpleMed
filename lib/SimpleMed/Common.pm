@@ -3,9 +3,8 @@ package SimpleMed::Common;
 use strict;
 use warnings;
 
-require Exporter;
+use Exporter qw(import);
 
-our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(clone pick omit);
 
 sub clone {

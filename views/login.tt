@@ -1,7 +1,7 @@
-{% Text::Template::fill_in_file("$settings{views}/partials/banner.tt", DELIMITERS => ['{%', '%}'], PACKAGE => __PACKAGE__); %}
+{% Text::Template::fill_in_file("$settings{views}/partials/banner.tt", DELIMITERS => ['{%', '%}'], PACKAGE => __PACKAGE__, PREPEND => $fi_prepend); %}
 <div id="login-form">
   <form action="/login" method="POST">
-    Username: <input type="text" name="username" value="{% no strict; $username %}" />
+    Username: <input type="text" name="username" value="{% e $username %}" />
     Password: <input type="password" name="password" />
     <input type="hidden" name="destination" value="{% $destination || '/' %}" />
     <input type="submit" value="Login" />
