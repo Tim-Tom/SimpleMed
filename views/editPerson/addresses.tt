@@ -1,0 +1,23 @@
+<div id="person-address">
+  <h1>Addresses</h1>
+  <form method="post">
+    <table id="person-address-table">
+{% use strict; use warnings;
+      return join('', map {
+          my $address = $addresses[$_] // {};
+          my ($type, $addr) = map { e $address->{$_} } qw(type address);
+          $addr =~ s!<br />!\n!g;
+          <<"END_ADDRESS";
+      <tr>
+        <th><input type="text" name="type_$_" id="person-address-$_-type" value="$type" /></th>
+	<td><textarea name="address_$_" id="person-address-$_-address" rows=4>$addr</textarea></td>
+      </tr>
+END_ADDRESS
+        } 0 .. $#addresses + 2);
+      %}
+    </table>
+    <input type="submit" value="Save" />
+    <button type="reset" />Reset</button>
+    <a href="/people/{% $person_id %}">Cancel</a>
+  </form>
+</div>

@@ -87,4 +87,32 @@ get '/people/:id/editDetails' => req_login sub {
   template 'editPerson/details', $result;
 };
 
+get '/people/:id/editAddresses' => req_login sub {
+  my $id = param('id');
+  my $result = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $result) {
+    send_error('Person does not exist', 404);
+  }
+  template 'editPerson/addresses', $result;
+};
+
+get '/people/:id/editPhones' => req_login sub {
+  my $id = param('id');
+  my $result = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $result) {
+    send_error('Person does not exist', 404);
+  }
+  template 'editPerson/phones', $result;
+};
+
+get '/people/:id/editEmails' => req_login sub {
+  my $id = param('id');
+  my $result = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $result) {
+    send_error('Person does not exist', 404);
+  }
+  template 'editPerson/emails', $result;
+};
+
+
 true;
