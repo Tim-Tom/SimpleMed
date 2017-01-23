@@ -1,0 +1,54 @@
+<div id="person-details">
+  <h1>Personal Details</h1>
+  <form method="post">
+    <table id ="person-details-table">
+      <tr>
+        <th><label for="person-details-first-name">First Name</label></th>
+        <td><input type="text" name="first_name" id="person-details-first-name" value="{% e $first_name %}" /></td>
+      </tr>
+      <tr>
+        <th><label for="person-details-middle-name">Middle Name</label></th>
+        <td><input type="text" name="middle_name" id="person-details-middle-name" value="{% e $middle_name %}" /></td>
+      </tr>
+      <tr>
+        <th><label for="person-details-last-name">Last Name</label></th>
+        <td><input type="text" name="last_name" id="person-details-last-name" value="{% e $last_name %}" /></td>
+      </tr>
+      <tr>
+        <th><label for="person-details-gender">Gender</label></th>
+        <td>
+          <select name="gender" id="person-details-gender">
+            <option value="Male"   {% "selected" if $gender eq 'Male'   %} id="person-details-gender-male"  >Male</option>
+            <option value="Female" {% "selected" if $gender eq 'Female' %} id="person-details-gender-female">Female</option>
+            <option value="" {% "selected" unless $gender %} id="person-details-gender-unspecified">--</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th><label for="person-details-birth-date">Birth Date</label></th>
+        <td><input type="date" name="birth_date" id="person-details-birth-date" value="{% e $birth_date %}" /></td>
+      </tr>
+      <tr>
+        <th><label for="person=details-time-zone">Time Zone</label></th>
+        <td>
+          <select name="time_zone" id="person-details-time-zone" />
+            {% use strict; use warnings;
+              use DateTime::TimeZone;
+              my @tz = qw(America/New_York America/Chicago America/Denver America/Los_Angeles);
+              push(@tz, grep { my $tz = $_; !grep { $_ eq $tz } @tz; } DateTime::TimeZone->all_names);
+              join("\n            ", map {
+                my $s = $_ eq $time_zone ? "selected" : "";
+                my $id = "person-details-time-zone-$_";
+                $id =~ tr!/_!--!;
+                qq(<option value="$_" $s id="$id">$_</option>);
+              } @tz);
+            %}
+          </select>
+        </td>
+      </tr>
+    </table>
+    <input type="submit" value="Save" />
+    <button type="reset" />Reset</button>
+    <a href="{% $person_id eq 'new' ? '/' : "/people/$person_id" %}">Cancel</a>
+  </form>
+</div>

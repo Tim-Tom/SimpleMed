@@ -69,4 +69,22 @@ get '/people/:id' => req_login sub {
   template 'person', $result;
 };
 
+
+get '/people/:id/editDetails' => req_login sub {
+  my $id = param('id');
+  my $result;
+  if ($id eq 'new') {
+    $result = {
+      person_id => 'new',
+      time_zone => 'America/Los_Angeles'
+    };
+  } else {
+    $result = SimpleMed::Core::Person::find_by_id($id);
+  }
+  if (!defined $result) {
+    send_error('Person does not exist', 404);
+  }
+  template 'editPerson/details', $result;
+};
+
 true;
