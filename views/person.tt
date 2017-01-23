@@ -86,7 +86,7 @@ END_EMAIL
       <th>Email</th>
       <th>Phone</th>
     </tr>
-    {%
+    {% use strict; use warnings;
       my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/person_contact_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
       for my $person (@emergency_contacts) {
         my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails relationship phones);

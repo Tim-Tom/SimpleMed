@@ -6,7 +6,7 @@
     <th>Phone</th>
   </tr>
   {% use strict; use warnings;
-    my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/people_row.tt", DELIMITERS => ['{%', '%}'], PREPREND => $fi_prepend) or die $Text::Template::ERROR;
+    my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/people_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
     for my $person (@people) {
       my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails phones);
       $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
