@@ -7,6 +7,7 @@ GRANT USAGE ON SCHEMA app TO SimpleMed_app_rw;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE
 ON ALL TABLES IN SCHEMA app TO SimpleMed_app_rw;
 
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA app TO SimpleMed_app_rw;
 
 GRANT SimpleMed_app_rw TO SimpleMedApplication;
 
