@@ -3,7 +3,10 @@ package SimpleMed::Client;
 use strict;
 use warnings;
 
-use Dancer2 appname => 'SimpleMed';
+use Dancer2;
+use Dancer2::Plugin::Database;
+
+use SimpleMed::Common qw(diff);
 
 use Try::Tiny;
 
@@ -60,6 +63,14 @@ get '/people' => req_login sub {
   template 'people', { people => [SimpleMed::Core::Person::get()] };
 };
 
+get '/people/new' => req_login sub {
+  my $result = {
+    person_id => 'new',
+    time_zone => 'America/Los_Angeles'
+   };
+  template 'editPerson/details', $result;
+};
+
 get '/people/:id' => req_login sub {
   my $id = param('id');
   my $result = SimpleMed::Core::Person::find_by_id($id);
@@ -69,22 +80,47 @@ get '/people/:id' => req_login sub {
   template 'person', $result;
 };
 
-
 get '/people/:id/editDetails' => req_login sub {
   my $id = param('id');
-  my $result;
-  if ($id eq 'new') {
-    $result = {
-      person_id => 'new',
-      time_zone => 'America/Los_Angeles'
-    };
-  } else {
-    $result = SimpleMed::Core::Person::find_by_id($id);
-  }
+  my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     send_error('Person does not exist', 404);
   }
   template 'editPerson/details', $result;
+};
+
+sub uparam {
+  return param(@_) || undef;
+}
+
+sub read_params_flat {
+  return { map { $_ => uparam($_) } @_ };
+}
+
+my @detail_keys = qw(first_name middle_name last_name gender birth_date time_zone);
+
+post '/people/new' => req_login sub {
+  my ($new, $final);
+  $new = read_params_flat @detail_keys;
+  $final = SimpleMed::Core::Person::create(database(), $new);
+  redirect('/people/' . $final->{person_id});
+};
+
+post '/people/:id/editDetails' => req_login sub {
+  my $id = param('id');
+  my ($original, $new, $final);
+  $new = read_params_flat @detail_keys;
+  $original = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $original) {
+    send_error('Person does not exist', 404);
+  }
+  my @d = diff($original, $new, @detail_keys);
+  if (@d) {
+    $final = SimpleMed::Core::Person::update(database(), $id, $new, @d);
+  } else {
+    $final = $original;
+  }
+  redirect('/people/' . $final->{person_id});
 };
 
 get '/people/:id/editAddresses' => req_login sub {
@@ -113,6 +149,5 @@ get '/people/:id/editEmails' => req_login sub {
   }
   template 'editPerson/emails', $result;
 };
-
 
 true;
