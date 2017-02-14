@@ -24,7 +24,6 @@ sub check_session {
 sub req_login(&) {
   my $route = shift;
   return sub {
-    check_session();
     $route->();
   };
 }
