@@ -16,7 +16,7 @@
 <body>
 {% $content %}
 <div id="footer">
-Powered by <a href="http://perldancer.org/">Dancer2</a> {% $dancer_version %}
+Powered by <a href="http://perl.org/">Perl</a>
 </div>
 </body>
 </html>

@@ -3,7 +3,6 @@ body {
     margin-bottom: 25px;
     padding: 0;
     background-color: #ddd;
-    background-image: url("/images/perldancer-bg.jpg");
     background-repeat: no-repeat;
     background-position: top left;
     font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
@@ -96,7 +95,6 @@ a:hover {
 }
 
 #header {
-    background-image: url("/images/perldancer.jpg");
     background-repeat: no-repeat;
     background-position: top left;
     height: 64px;

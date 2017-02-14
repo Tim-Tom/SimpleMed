@@ -16,8 +16,6 @@ public/favicon.ico
 public/404.html
 public/dispatch.cgi
 public/javascripts/jquery.js
-public/images/perldancer.jpg
-public/images/perldancer-bg.jpg
 public/css/error.css
 public/css/style.css
 environments/development.yml
