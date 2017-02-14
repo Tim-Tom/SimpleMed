@@ -30,7 +30,7 @@ my %parsers = (
   'application/x-www-form-urlencoded' => ['iso-8859-1', \&SimpleMed::Request::UrlEncoded::parse],
   'application/json' => ['utf-8', \&SimpleMed::Request::JSON::parse],
   'application/yaml' => ['utf-8', \&SimpleMed::Request::YAML::parse],
-  'text/yaml' => ['iso-8859-1', \&SimpleMed::Request::YAML::parse],
+  'text/yaml' => ['utf-8', \&SimpleMed::Request::YAML::parse],
 );
 
 @parsers{qw(application/x-yaml text/x-yaml)} = @parsers{qw(application/yaml text/yaml)};
