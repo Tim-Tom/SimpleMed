@@ -9,6 +9,9 @@ use parent qw(Plack::Request);
 use Carp qw(croak);
 
 use Encode qw(encode decode);
+use IO::Uncompress::Unzip qw(unzip);
+use IO::Uncompress::Gunzip qw(gunzip);
+use Compress::LZW qw();
 
 use SimpleMed::Request::UrlEncoded;
 use SimpleMed::Request::JSON;
@@ -52,7 +55,22 @@ sub _parse_content {
   } else {
     croak "Feersum broke API contract";
   }
-  # Todo: Handle content encoding.
+  my $encoding = $self->content_encoding;
+  if ($encoding) {
+    if ($encoding eq 'deflate') {
+      my $newBody;
+      unzip(\$body => \$newBody) or croak("Failed to decode content: $IO::Uncompress:Unzip::UnzipError");
+      $body = $newBody;
+    } elsif ($encoding eq 'gzip') {
+      my $newBody;
+      gunzip(\$body => \$newBody) or croak("Failed to decode content: $IO::Uncompress:Gunzip::GunzipError");
+      $body = $newBody;
+    } elsif ($encoding eq 'compress') {
+      $body = Compress::LZW::decompress($body) or croach("Failed to decode content");
+    } else {
+      croak("Content encoding of '$encoding' is not supported");
+    }
+  }
   my ($type, $charset) = _parse_content_type($self->content_type);
   my $parser = $parsers{$type};
   unless ($parser) {
