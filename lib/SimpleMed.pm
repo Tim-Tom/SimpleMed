@@ -15,6 +15,8 @@ use feature 'postderef';
 
 use Data::Printer;
 
+my @routes;
+
 sub Application($req) {
   my $env = SimpleMed::Request->new($req->env);
   p($req);
