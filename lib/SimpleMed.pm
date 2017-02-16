@@ -5,8 +5,6 @@ use v5.24;
 use strict;
 use warnings;
 
-use SimpleMed::Request;
-
 no warnings 'experimental::signatures';
 use feature 'signatures';
 
@@ -15,10 +13,37 @@ use feature 'postderef';
 
 use Data::Printer;
 
-my @routes;
+use EV;
+use AnyEvent;
+use AnyEvent::IO;
+use AnyEvent::AIO;
+use IO::AIO qw(aio_scandir);
+
+use SimpleMed::Request;
+use SimpleMed::StaticFile;
+use SimpleMed::Error;
+
+our @Routes;
+
+push(@Routes, @SimpleMed::StaticFile::Routes);
 
 sub Application($req) {
+  # todo: wrap in try/catch
   my $env = SimpleMed::Request->new($req->env);
+  my @possible_methods;
+  foreach my $route (@Routes) {
+    my ($method, $regex, $handler) = @$route;
+    my $correct_route = ($env->path =~ $regex);
+    next unless $correct_route;
+    if ($method ne $env->method) {
+      push(@possible_methods, $method);
+    } else {
+      return $handler->($req, $env);
+    }
+  }
+  if (@possible_methods) {
+    return SimpleMed::Error::Handle_Error($req, $env, { code => 405, matches => \@possible_methods });
+  }
   p($req);
   p($req->env);
   if ($env->method eq 'POST') {
@@ -39,6 +64,7 @@ sub Application($req) {
 <html>
 <head>
   <title>Simple Form</title>
+  <link rel="shortcut icon" href="/favicon.ico" />
 </head>
 <body>
   <form method="post">
