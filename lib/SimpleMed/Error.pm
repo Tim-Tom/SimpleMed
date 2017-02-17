@@ -11,6 +11,11 @@ use feature 'signatures';
 no warnings 'experimental::postderef';
 use feature 'postderef';
 
+use JSON;
+use YAML::XS;
+
+use Encode qw(encode);
+
 my %default_summary = (
   400 => 'Bad Request',
   401 => 'Unauthorized',
@@ -52,17 +57,64 @@ my %default_summary = (
   511 => 'Network Authentication Required',
 );
 
-sub Handle_Error {
-  my ($req, $env, $error) = @_;
-  $req->send_response(500, ['Content-Type' => 'text/plain'], 'Not Yet Implemented');
+my $json_encoder = JSON->new(utf8 => 0);
+if (1) {
+  $json_encoder->pretty(1)->canonical(1);
+} else {
+  $json_encoder->pretty(0)->canonical(0);
 }
 
-sub Handle_404 {
-  my ($req, $env, $path) = @_;
-  return handle_error($req, $env, {
-    code => 404,
-    message => "The resource requested at $path does not exist."
-   });
+sub Handle_Error($req, $env, $error) {
+  my %error;
+  my $errType = ref($error);
+  if ($errType) {
+    if ($errType eq 'HASH') {
+      %error = %{$error};
+    } else {
+      warn "Unable to handle warning of type $errType";
+      %error = (
+        code => 500,
+        message => "An unknown error occured."
+      );
+    }
+  } elsif ($error =~ /^\d+$/) {
+    %error = (
+      code => $error,
+    );
+  }
+  $error{code} ||= 500;
+  $error{summary} ||= $default_summary{$error{code}};
+  if ($env->path =~ m!^/api/json!) {
+    send_error_json($req, \%error);
+  } elsif ($env->path =~ m!^/api/yaml!) {
+    send_error_yaml($req, \%error);
+  } else {
+    send_error_json($req, \%error);
+    ## HTML Mode
+    # $req->send_response(500, ['Content-Type' => 'text/plain'], );
+  }
+}
+
+sub Handle_404($req, $env) {
+  return Handle_Error($req, $env, { code => 404, message => "The resource requested at ".($env->path)." does not exist." });
+}
+
+sub Handle_Invalid_Method($req, $env, @possible_methods) {
+  my $path = $env->path;
+  my $method = $env->method;
+  my $joined = join(', ', @possible_methods);
+  my $message = "$method is not a valid http method for $path. The following methods are supported: $joined";
+  return Handle_Error($req, $env, { code => 405, possible => \@possible_methods, message => $message });
+}
+
+sub send_error_yaml($req, $error) {
+  my $content = encode('utf-8', YAML::XS::Dump($error));
+  $req->send_response($error->{code}, ['Content-Type' => 'text/yaml', 'Content-Length' => length($content)], $content);
+}
+
+sub send_error_json($req, $error) {
+  my $content = encode('utf-8', $json_encoder->encode($error));
+  $req->send_response($error->{code}, ['Content-Type' => 'application/json', 'Content-Length' => length($content)], $content);
 }
 
 1;
