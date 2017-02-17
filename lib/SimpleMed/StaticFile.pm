@@ -29,7 +29,7 @@ sub read_block($in, $out) {
       $out->write($data);
     }
     if (length($data) == $buffer_size) {
-      read_block($in, $out, $buffer_size);
+      read_block($in, $out);
     } else {
       $in->close();
       $out->close();
@@ -50,7 +50,7 @@ sub get_static_file($req, $env, $mime, $filename) {
         };
       } else {
         my $out = $req->start_streaming(200, ['Content-Type' => $mime]);
-        read_block($in, $out, ($length < $buffer_size ? $length : $buffer_size));
+        read_block($in, $out);
       }
     }
   }
