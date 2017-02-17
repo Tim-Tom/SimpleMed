@@ -23,14 +23,15 @@ our @Routes;
 
 const my $buffer_size => 16 * 1024;
 
-sub read_block($in, $out, $length) {
-  aio_read $in, $length, sub($data) {
+sub read_block($in, $out) {
+  aio_read $in, $buffer_size, sub($data) {
     if (length($data) > 0) {
       $out->write($data);
     }
     if (length($data) == $buffer_size) {
       read_block($in, $out, $buffer_size);
     } else {
+      $in->close();
       $out->close();
     }
   };
@@ -42,8 +43,15 @@ sub get_static_file($req, $env, $mime, $filename) {
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
       die 404 unless $in;
-      my $out = $req->start_streaming(200, ['Content-Type' => $mime, 'Content-Length' => $length]);
-      read_block($in, $out, ($length < $buffer_size ? $length : $buffer_size));
+      if ($length < $buffer_size) {
+        aio_read $in, $length, sub($data) {
+          $in->close();
+          $req->send_response(200, ['Content-Type' => $mime, 'Content-Length' => $length], $data);
+        };
+      } else {
+        my $out = $req->start_streaming(200, ['Content-Type' => $mime]);
+        read_block($in, $out, ($length < $buffer_size ? $length : $buffer_size));
+      }
     }
   }
 }
@@ -57,7 +65,7 @@ sub get_static_file($req, $env, $mime, $filename) {
     while(readdir $dir) {
       next if /^\.\.?$/;
       my $path = "$dirname/$_";
-      if (-d) {
+      if (-d $path) {
         push(@dirs, $path);
       } else {
         push(@files, $path);
@@ -66,7 +74,8 @@ sub get_static_file($req, $env, $mime, $filename) {
   }
 
   foreach my $filename (@files) {
-    my $mime = Plack::MIME::mime_type($filename);
+    my $mime = Plack::MIME->mime_type($filename);
+    say "mime type of $filename is $mime";
     my $fileRegex = quotemeta substr($filename, length 'public');
     $fileRegex = qr/^$fileRegex$/;
     push(@Routes, ['GET', $fileRegex, sub($req, $env) { get_static_file($req, $env, $mime, $filename) }]);
