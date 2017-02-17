@@ -14,7 +14,9 @@ use feature 'postderef';
 use JSON;
 use YAML::XS;
 
-use Encode qw(encode);
+use SimpleMed::Config qw(%Config);
+
+use Unicode::UTF8 qw(encode_utf8);
 
 my %default_summary = (
   400 => 'Bad Request',
@@ -57,11 +59,10 @@ my %default_summary = (
   511 => 'Network Authentication Required',
 );
 
-my $json_encoder = JSON->new(utf8 => 0);
-if (1) {
-  $json_encoder->pretty(1)->canonical(1);
-} else {
-  $json_encoder->pretty(0)->canonical(0);
+my $jc = $SimpleMed::Config::Config{serialization}{json};
+my $json_encoder = JSON->new();
+while(my ($k, $v) = each $jc->%*) {
+  $json_encoder->$k($v);
 }
 
 sub Handle_Error($req, $env, $error) {
@@ -108,12 +109,12 @@ sub Handle_Invalid_Method($req, $env, @possible_methods) {
 }
 
 sub send_error_yaml($req, $error) {
-  my $content = encode('utf-8', YAML::XS::Dump($error));
+  my $content = encode_utf8(YAML::XS::Dump($error));
   $req->send_response($error->{code}, ['Content-Type' => 'text/yaml', 'Content-Length' => length($content)], $content);
 }
 
 sub send_error_json($req, $error) {
-  my $content = encode('utf-8', $json_encoder->encode($error));
+  my $content = encode_utf8($json_encoder->encode($error));
   $req->send_response($error->{code}, ['Content-Type' => 'application/json', 'Content-Length' => length($content)], $content);
 }
 

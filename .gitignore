@@ -1,2 +1,2 @@
-environments/*.yml
-!environments/sample.yml
+config/*.yml
+!config/sample.yml
