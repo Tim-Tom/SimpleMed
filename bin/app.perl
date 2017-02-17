@@ -1,11 +1,20 @@
 #!/usr/bin/env perl
+use v5.24;
 
 use strict;
 use warnings;
+
+no warnings 'experimental::signatures';
+use feature 'signatures';
+
+no warnings 'experimental::postderef';
+use feature 'postderef';
+
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use Feersum::Runner;
+
 use SimpleMed;
 
 my $runner = Feersum::Runner->new(
