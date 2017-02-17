@@ -21,15 +21,15 @@ use feature 'postderef';
 
 our @Routes;
 
-const my $buffer_size => 1024;
+const my $buffer_size => 16 * 1024;
 
-sub read_block($in, $out) {
-  aio_read $in, $buffer_size, sub($data) {
+sub read_block($in, $out, $length) {
+  aio_read $in, $length, sub($data) {
     if (length($data) > 0) {
       $out->write($data);
     }
     if (length($data) == $buffer_size) {
-      read_block($in, $out);
+      read_block($in, $out, $buffer_size);
     } else {
       $out->close();
     }
@@ -43,7 +43,7 @@ sub get_static_file($req, $env, $mime, $filename) {
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
       die 404 unless $in;
       my $out = $req->start_streaming(200, ['Content-Type' => $mime, 'Content-Length' => $length]);
-      read_block($in, $out);
+      read_block($in, $out, ($length < $buffer_size ? $length : $buffer_size));
     }
   }
 }
