@@ -1,23 +1,13 @@
-# configuration file for sample development environment.  You should clone this 
+# configuration file for sample development environment.  You should clone this into your
+# own developer specific config so that nothing gets checked into the repository.
 
-# the logger engine to use
-# console: log messages to STDOUT (your console where you started the
-#          application server)
-# file:    log message to a file in log/
-logger: "console"
+# Logging information...
 
-# the log level for this environment
-# core is the lowest, it shows Dancer2's core log messages as well as yours
-# (debug, info, warning and error)
-log: "core"
-
-# should Dancer2 consider warnings as critical errors?
-warnings: 1
-
-# should Dancer2 show a stacktrace when an 5xx error is caught?
-# if set to yes, public/500.html will be ignored and either
-# views/500.tt, 'error_template' template, or a default error template will be used.
-show_errors: 1
-
-# print the banner
-startup_info: 1
+# Flags to control API serialization. Generally these are just configuration options to
+# enable human readable extensions to the APIs to make working with them less painful.
+serialization:
+  json:
+    # Pretty print json
+    pretty: true
+    # Sort keys alphabetically
+    canonical: true
