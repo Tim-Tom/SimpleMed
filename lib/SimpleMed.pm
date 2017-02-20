@@ -51,31 +51,9 @@ sub Application($req) {
   }
   if (@possible_methods) {
     return SimpleMed::Error::Handle_Invalid_Method($req, $env, @possible_methods);
+  } else {
+    return SimpleMed::Error::Handle_404($req, $env);
   }
-  p($req);
-  p($req->env);
-  if ($env->method eq 'POST') {
-    p($env->content);
-  }
-  $req->send_response(
-    200,
-    [ 'Content-Type' => 'text/html' ],
-    \<<'END_HTML'
-<html>
-<head>
-  <title>Simple Form</title>
-  <link rel="shortcut icon" href="/favicon.ico" />
-</head>
-<body>
-  <form method="post">
-    <label for="username">Username</label><input type="text" name="username" />
-    <label for="password">Password</label><input type="password" name="password" />
-    <input type="submit" value="Login" />
-  </form>
-</body>
-</html>
-END_HTML
-   );
 }
 
 1;
