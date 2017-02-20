@@ -19,6 +19,10 @@ use AnyEvent::IO;
 
 use SimpleMed::Config qw(%Config);
 
+use Exporter qw(import);
+
+our @EXPORT_OK = qw(get_template fill_in);
+
 my %templates;
 
 sub read_template($filename) {
@@ -30,7 +34,7 @@ sub read_template($filename) {
       return $cv->croak({ category => 'environment', message => "Unable to open template $filename for read: $!" }) unless $in;
       aio_read $in, $length, sub($data) {
         $in->close();
-        $cv->send(Text::Template->new(TYPE => 'STRING', DELIMITERS => ['{%', '%}'], SOURCE => decode_utf8($data)));
+        $cv->send(Text::Template->new(TYPE => 'STRING', DELIMITERS => ['{%', '%}'], PREPEND => 'use SimpleMed::TemplateHelpers;', SOURCE => decode_utf8($data)));
       };
     };
   };
@@ -44,11 +48,15 @@ sub read_template($filename) {
   return $result;
 }
 
-sub fill_in($template, $data) {
+sub get_template($template) {
   unless ($Config{template}{caching} && $templates{$template}) {
     $templates{$template} = read_template("$Config{server}{views}/$template.tt");
   };
-  return $templates{$template}->fill_in(HASH => $data);
+  return $templates{$template};
+}
+
+sub fill_in($template, $data) {
+  return get_template($template)->fill_in(HASH => $data);
 }
 
 1;

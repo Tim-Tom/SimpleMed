@@ -4,9 +4,12 @@ use strict;
 use warnings;
 
 use HTML::Entities qw();
+
+use SimpleMed::Template qw(get_template fill_in);
+
 use Exporter qw(import);
 
-our @EXPORT_OK = qw(e ea);
+our @EXPORT = qw(e ea get_template fill_in);
 
 sub e {
   return '' unless $_[0];
