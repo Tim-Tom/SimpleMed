@@ -23,8 +23,7 @@ my %templates;
 
 sub read_template($filename) {
   my $cv = AnyEvent->condvar;
-  aio_stat $filename, sub {
-    my $success = shift;
+  aio_stat $filename, sub($success=undef) {
     return $cv->croak({ category => 'environment', message => "Unable to find template $filename" }) unless $success;
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
