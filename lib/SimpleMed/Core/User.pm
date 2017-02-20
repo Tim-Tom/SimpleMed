@@ -5,8 +5,6 @@ use v5.22;
 use strict;
 use warnings;
 
-use Dancer2;
-
 no warnings 'experimental::signatures';
 use feature 'signatures';
 

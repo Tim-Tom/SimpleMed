@@ -1,10 +1,9 @@
 package SimpleMed::Client;
 
+# TODO: Rework
+
 use strict;
 use warnings;
-
-use Dancer2;
-use Dancer2::Plugin::Database;
 
 use SimpleMed::Common qw(diff);
 

@@ -1,5 +1,7 @@
 package SimpleMed::API;
 
+# TODO: Rework
+
 use strict;
 use warnings;
 
@@ -10,8 +12,6 @@ use feature 'signatures';
 
 no warnings 'experimental::postderef';
 use feature 'postderef';
-
-use Dancer2;
 
 use Try::Tiny;
 
@@ -36,8 +36,6 @@ sub req_login {
     $route->();
   };
 }
-
-set serializer => 'mutable';
 
 prefix '/users' => sub {
   post '/login' => sub {
