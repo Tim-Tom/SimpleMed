@@ -15,6 +15,7 @@ use JSON;
 use YAML::XS;
 
 use SimpleMed::Config qw(%Config);
+use SimpleMed::Template;
 
 use Unicode::UTF8 qw(encode_utf8);
 
@@ -59,7 +60,7 @@ my %default_summary = (
   511 => 'Network Authentication Required',
 );
 
-my $jc = $SimpleMed::Config::Config{serialization}{json};
+my $jc = $Config{serialization}{json};
 my $json_encoder = JSON->new();
 while(my ($k, $v) = each $jc->%*) {
   $json_encoder->$k($v);
@@ -90,9 +91,7 @@ sub Handle_Error($req, $env, $error) {
   } elsif ($env->path =~ m!^/api/yaml!) {
     send_error_yaml($req, \%error);
   } else {
-    send_error_json($req, \%error);
-    ## HTML Mode
-    # $req->send_response(500, ['Content-Type' => 'text/plain'], );
+    send_error_template($req, \%error);
   }
 }
 
@@ -106,6 +105,11 @@ sub Handle_Invalid_Method($req, $env, @possible_methods) {
   my $joined = join(', ', @possible_methods);
   my $message = "$method is not a valid http method for $path. The following methods are supported: $joined";
   return Handle_Error($req, $env, { code => 405, possible => \@possible_methods, message => $message });
+}
+
+sub send_error_template($req, $error) {
+  my $content = SimpleMed::Template::fill_in('layouts/error', $error);
+  $req->send_response($error->{code}, ['Content-Type' => 'text/html'], $content);
 }
 
 sub send_error_yaml($req, $error) {

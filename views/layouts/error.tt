@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Error {% $code %}</title>
+  <title>Error {% $summary || $code %}</title>
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/css/error.css">
 </head>
 <body>
 <h1>Error: {% $code %}</h1>
 <div id="content">
-  <h2>{% summary %}</h2>
-  <p>{% $error %}</p>
+  <h2>{% $summary %}</h2>
+  <p>{% $message %}</p>
 </div>
 <div id="footer">
 Powered by <a href="http://perl.org/">Perl</a>.

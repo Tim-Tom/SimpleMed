@@ -11,7 +11,6 @@ use Carp qw(croak);
 use Plack::MIME;
 
 use AnyEvent::IO;
-use AnyEvent::AIO;
 
 no warnings 'experimental::signatures';
 use feature 'signatures';
@@ -38,7 +37,8 @@ sub read_block($in, $out) {
 }
 
 sub get_static_file($req, $env, $mime, $filename) {
-  aio_stat $filename, sub($success) {
+  aio_stat $filename, sub {
+    my $success = shift;
     die 404 unless $success;
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {

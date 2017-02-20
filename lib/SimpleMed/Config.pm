@@ -18,6 +18,9 @@ use YAML::XS;
 
 use Encode qw(decode);
 
+use Exporter qw(import);
+our @EXPORT_OK = qw(%Config);
+
 our %Config;
 
 sub create($config_filename, $server_root) {
@@ -27,7 +30,8 @@ sub create($config_filename, $server_root) {
   %Config = %{YAML::XS::Load($config_text)};
   # TODO: We should probably validate the keys to make sure there are no stupid typos. Perhaps https://github.com/rjbs/rx?
   $Config{server} = {
-    root => $server_root
+    root => $server_root,
+    views => "$server_root/views"
    };
   return %Config;
 }
