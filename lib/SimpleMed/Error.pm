@@ -108,7 +108,7 @@ sub Handle_Invalid_Method($req, $env, @possible_methods) {
 }
 
 sub send_error_template($req, $error) {
-  my $content = SimpleMed::Template::fill_in('layouts/error', $error);
+  my $content = encode_utf8(SimpleMed::Template::fill_in('layouts/error', $error));
   $req->send_response($error->{code}, ['Content-Type' => 'text/html'], $content);
 }
 
