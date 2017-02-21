@@ -1,3 +1,4 @@
+{% use vars qw($first_name $middle_name $last_name $gender $birth_date $time_zone @addresses @phones @emergency_contacts @emails $insurer); %}
 <div id="person-details">
   <h1>Personal Details</h1>
   <table id="person-details-table">
@@ -31,7 +32,7 @@
 <div id="person-address">
   <h1>Addresses</h1>
   <table id="person-address-table">
-    {% use strict; use warnings;
+    {%
     for my $address (@addresses) {
         my $addr_escaped = e $address->{address};
         $OUT .= <<"END_ADDRESS";
@@ -48,7 +49,7 @@ END_ADDRESS
 <div id="person-phone">
   <h1>Phone Numbers</h1>
   <table id="person-phone-table">
-    {% use strict;
+    {%
       for my $phone (@phones) {
         my ($t, $p) = ea($phone->{type}, $phone->{number});
         $OUT .= <<"END_PHONE";
@@ -65,7 +66,7 @@ END_PHONE
 <div id="person-email">
   <h1>Emails</h1>
   <ul id="person-email-list">
-    {% use strict;
+    {%
       for my $email (@emails) {
         my $e = e $email;
         $OUT .= <<"END_EMAIL";
@@ -86,7 +87,7 @@ END_EMAIL
       <th>Email</th>
       <th>Phone</th>
     </tr>
-    {% use strict; use warnings;
+    {%
       my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/person_contact_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
       for my $person (@emergency_contacts) {
         my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails relationship phones);

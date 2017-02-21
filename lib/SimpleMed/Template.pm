@@ -21,7 +21,7 @@ use SimpleMed::Config qw(%Config);
 
 use Exporter qw(import);
 
-our @EXPORT_OK = qw(get_template fill_in);
+our @EXPORT_OK = qw(get_template template template_pkg);
 
 my %templates;
 
@@ -34,18 +34,11 @@ sub read_template($filename) {
       return $cv->croak({ category => 'environment', message => "Unable to open template $filename for read: $!" }) unless $in;
       aio_read $in, $length, sub($data) {
         $in->close();
-        $cv->send(Text::Template->new(TYPE => 'STRING', DELIMITERS => ['{%', '%}'], PREPEND => 'use SimpleMed::TemplateHelpers;', SOURCE => decode_utf8($data)));
+        $cv->send(Text::Template->new(TYPE => 'STRING', DELIMITERS => ['{%', '%}'], PREPEND => 'use strict; use SimpleMed::TemplateHelpers', SOURCE => decode_utf8($data)));
       };
     };
   };
-  my $result = eval {
-    $cv->recv;
-  };
-  if ($@) {
-    use Data::Printer;
-    p($@);
-  }
-  return $result;
+  return $cv->recv;
 }
 
 sub get_template($template) {
@@ -55,8 +48,12 @@ sub get_template($template) {
   return $templates{$template};
 }
 
-sub fill_in($template, $data) {
+sub template($template, $data) {
   return get_template($template)->fill_in(HASH => $data);
+}
+
+sub template_pkg($template, $package) {
+  return get_template($template)->fill_in(PACKAGE => $package);
 }
 
 1;

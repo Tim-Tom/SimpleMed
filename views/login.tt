@@ -1,4 +1,5 @@
-{% Text::Template::fill_in_file("$settings{views}/partials/banner.tt", DELIMITERS => ['{%', '%}'], PACKAGE => __PACKAGE__, PREPEND => $fi_prepend); %}
+{% use vars qw($username $destination) %}
+{% template_pkg('partials/banner', __PACKAGE__) %}
 <div id="login-form">
   <form action="/login" method="POST">
     Username: <input type="text" name="username" value="{% e $username %}" />

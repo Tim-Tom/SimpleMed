@@ -108,18 +108,18 @@ sub Handle_Invalid_Method($req, $env, @possible_methods) {
 }
 
 sub send_error_template($req, $error) {
-  my $content = encode_utf8(SimpleMed::Template::fill_in('layouts/error', $error));
+  my $content = encode_utf8(SimpleMed::Template::template('layouts/error', $error));
   $req->send_response($error->{code}, ['Content-Type' => 'text/html; charset=utf-8'], $content);
 }
 
 sub send_error_yaml($req, $error) {
   my $content = encode_utf8(YAML::XS::Dump($error));
-  $req->send_response($error->{code}, ['Content-Type' => 'text/yaml', 'Content-Length' => length($content)], $content);
+  $req->send_response($error->{code}, ['Content-Type' => 'text/yaml'], $content);
 }
 
 sub send_error_json($req, $error) {
   my $content = encode_utf8($json_encoder->encode($error));
-  $req->send_response($error->{code}, ['Content-Type' => 'application/json', 'Content-Length' => length($content)], $content);
+  $req->send_response($error->{code}, ['Content-Type' => 'application/json'], $content);
 }
 
 1;

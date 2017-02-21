@@ -2,21 +2,21 @@ package SimpleMed::StaticFile;
 
 use v5.24;
 
-use Const::Fast;
-
 use strict;
 use warnings;
-
-use Carp qw(croak);
-use Plack::MIME;
-
-use AnyEvent::IO;
 
 no warnings 'experimental::signatures';
 use feature 'signatures';
 
 no warnings 'experimental::postderef';
 use feature 'postderef';
+
+use Const::Fast;
+
+use Carp qw(croak);
+use Plack::MIME;
+
+use AnyEvent::IO;
 
 our @Routes;
 
@@ -45,7 +45,7 @@ sub get_static_file($req, $env, $mime, $filename) {
       if ($length < $buffer_size) {
         aio_read $in, $length, sub($data) {
           $in->close();
-          $req->send_response(200, ['Content-Type' => $mime, 'Content-Length' => $length], $data);
+          $req->send_response(200, ['Content-Type' => $mime], $data);
         };
       } else {
         my $out = $req->start_streaming(200, ['Content-Type' => $mime]);

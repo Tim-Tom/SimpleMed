@@ -1,3 +1,4 @@
+{% use vars qw(@people); %}
 <table id="user-list">
   <tr>
     <th>Info</th>
@@ -5,13 +6,12 @@
     <th>Email</th>
     <th>Phone</th>
   </tr>
-  {% use strict; use warnings;
-    my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/people_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
+  {%
     for my $person (@people) {
       my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails phones);
       $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
-      $data{phone} = $data{phones}[0]{number} if @{$data{emails}} > 0;
-      $OUT .= $template->fill_in(HASH => \%data);
+      $data{phone} = $data{phones}[0]{number} if @{$data{phones}} > 0;
+      $OUT .= template('partials/people_row', \%data);
     }
   %}
 </table>

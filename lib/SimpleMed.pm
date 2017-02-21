@@ -21,11 +21,12 @@ use IO::AIO qw(aio_scandir);
 
 use SimpleMed::Request;
 use SimpleMed::StaticFile;
+use SimpleMed::Client;
 use SimpleMed::Error;
 
 our @Routes;
 
-push(@Routes, @SimpleMed::StaticFile::Routes);
+push(@Routes, @SimpleMed::StaticFile::Routes, @SimpleMed::Client::Routes);
 
 sub Application($req) {
   # todo: wrap in try/catch
