@@ -7,6 +7,10 @@
 template:
   caching: true
 
+static:
+  enabled: true
+  buffer_size: 16384
+
 # Flags to control API serialization. Generally these are just configuration options to
 # enable human readable extensions to the APIs to make working with them less painful.
 serialization:

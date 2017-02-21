@@ -11,7 +11,7 @@ use feature 'signatures';
 no warnings 'experimental::postderef';
 use feature 'postderef';
 
-use Data::Printer;
+use Try::Tiny;
 
 use EV;
 use AnyEvent;
@@ -20,13 +20,10 @@ use AnyEvent::AIO;
 use IO::AIO qw(aio_scandir);
 
 use SimpleMed::Request;
+use SimpleMed::Routing;
 use SimpleMed::StaticFile;
 use SimpleMed::Client;
 use SimpleMed::Error;
-
-our @Routes;
-
-push(@Routes, @SimpleMed::StaticFile::Routes, @SimpleMed::Client::Routes);
 
 sub Application($req) {
   # todo: wrap in try/catch
@@ -40,14 +37,19 @@ sub Application($req) {
   # alternation branch(es) that matched). But for now since I'm just getting this thing
   # up, I'll just quickly transform the input into a regex and match the series of them
   # iteratively.
-  foreach my $route (@Routes) {
+  foreach my $route (@SimpleMed::Routing::Routes) {
     my ($method, $regex, $handler) = @$route;
     my $correct_route = ($env->path =~ $regex);
     next unless $correct_route;
     if ($method ne $env->method) {
       push(@possible_methods, $method);
     } else {
-      return $handler->($req, $env);
+      try {
+        $handler->($req, $env);
+      } catch {
+        SimpleMed::Error::Handle_Error($req, $env, $_);
+      };
+      return;
     }
   }
   if (@possible_methods) {

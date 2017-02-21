@@ -18,16 +18,16 @@ use Plack::MIME;
 
 use AnyEvent::IO;
 
-our @Routes;
-
-const my $buffer_size => 16 * 1024;
+use SimpleMed::Config qw(%Config);
+use SimpleMed::Routing qw(:vars get);
 
 sub read_block($in, $out) {
-  aio_read $in, $buffer_size, sub($data) {
+  my $len = $Config{static}{buffer_size};
+  aio_read $in, $len, sub($data) {
     if (length($data) > 0) {
       $out->write($data);
     }
-    if (length($data) == $buffer_size) {
+    if (length($data) == $len) {
       read_block($in, $out);
     } else {
       $in->close();
@@ -36,13 +36,13 @@ sub read_block($in, $out) {
   };
 }
 
-sub get_static_file($req, $env, $mime, $filename) {
+sub get_static_file($mime, $filename) {
   aio_stat $filename, sub($success=undef) {
     die 404 unless $success;
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
       die 404 unless $in;
-      if ($length < $buffer_size) {
+      if ($length < $Config{static}{buffer_size}) {
         aio_read $in, $length, sub($data) {
           $in->close();
           $req->send_response(200, ['Content-Type' => $mime], $data);
@@ -55,7 +55,7 @@ sub get_static_file($req, $env, $mime, $filename) {
   }
 }
 
-{
+if ($Config{static}{enabled}) {
   my @dirs = ('public');
   my @files;
 
@@ -74,10 +74,9 @@ sub get_static_file($req, $env, $mime, $filename) {
 
   foreach my $filename (@files) {
     my $mime = Plack::MIME->mime_type($filename);
-    say "mime type of $filename is $mime";
-    my $fileRegex = quotemeta substr($filename, length 'public');
-    $fileRegex = qr/^$fileRegex$/;
-    push(@Routes, ['GET', $fileRegex, sub($req, $env) { get_static_file($req, $env, $mime, $filename) }]);
+    get substr($filename, length 'public') => sub() {
+      get_static_file($mime, $filename);
+    };
   }
 }
 
