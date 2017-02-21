@@ -19,7 +19,7 @@ use Plack::MIME;
 use AnyEvent::IO;
 
 use SimpleMed::Config qw(%Config);
-use SimpleMed::Routing qw(:vars get);
+use SimpleMed::Routing qw(get);
 
 sub read_block($in, $out) {
   my $len = $Config{static}{buffer_size};
@@ -36,7 +36,7 @@ sub read_block($in, $out) {
   };
 }
 
-sub get_static_file($mime, $filename) {
+sub get_static_file($req, $env, $mime, $filename) {
   aio_stat $filename, sub($success=undef) {
     die 404 unless $success;
     my $length = -s _;
@@ -74,8 +74,8 @@ if ($Config{static}{enabled}) {
 
   foreach my $filename (@files) {
     my $mime = Plack::MIME->mime_type($filename);
-    get substr($filename, length 'public') => sub() {
-      get_static_file($mime, $filename);
+    get substr($filename, length 'public') => sub($req, $env) {
+      get_static_file($req, $env, $mime, $filename);
     };
   }
 }
