@@ -1,2 +1,3 @@
 config/*.yml
 !config/sample.yml
+scratch
