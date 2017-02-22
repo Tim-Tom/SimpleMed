@@ -11,6 +11,16 @@ static:
   enabled: true
   buffer_size: 16384
 
+database:
+  driver: 'Pg'
+  database: 'SimpleMed'
+  host: 'localhost'
+  username: 'SimpleMedApplication'
+  password: 'password'
+  params:
+    exec_server: true
+    AutoCommit: true
+
 # Flags to control API serialization. Generally these are just configuration options to
 # enable human readable extensions to the APIs to make working with them less painful.
 serialization:
