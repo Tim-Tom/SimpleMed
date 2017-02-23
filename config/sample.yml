@@ -7,16 +7,22 @@
 template:
   caching: true
 
+# Static Files
 static:
   enabled: true
   buffer_size: 16384
 
+# Database Information
 database:
   driver: 'Pg'
   database: 'SimpleMed'
   host: 'localhost'
   username: 'SimpleMedApplication'
   password: 'password'
+  # The maximum number of connections to hold open at any time
+  maxConnections: 3
+  # The amount of time in seconds to leave a connection idle before closing it
+  connection_reap_threshold: 60
   params:
     exec_server: true
     AutoCommit: true
