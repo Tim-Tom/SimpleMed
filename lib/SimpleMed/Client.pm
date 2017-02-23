@@ -31,8 +31,6 @@ get '/login' => sub($req, $env) {
 };
 
 post '/login' => sub($req, $env) {
-  use Data::Printer;
-  p($env);
   die 500;
   my $username = param('username');
   my $password = param('password');

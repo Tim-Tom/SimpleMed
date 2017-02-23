@@ -57,7 +57,7 @@ sub AcquireConnection {
     push(@connections, $conn);
     $min_connection_available = 0;
     if (!defined $connection_reaper) {
-      $connection_reaper = AnyEvent->timer(after => $reap_threshold, repeat => $reap_threshold, cb => \&reap_connections);
+      $connection_reaper = AnyEvent->timer(after => $reap_threshold, interval => $reap_threshold, cb => \&reap_connections);
     }
     return SimpleMed::AcquiredDatabaseConnection->new($conn);
   } else {
@@ -72,11 +72,12 @@ sub AcquireConnection {
 sub reap_connections {
   if ($min_connection_available > 0 && @available_connections) {
     my $reaped = shift @available_connections;
+    my $index;
     my $i;
     for $i (0 .. $#connections) {
-      last if ($reaped == $connections[$i]);
+      $index = $i and last if ($reaped == $connections[$i]);
     }
-    splice(@connections, $i, 1);
+    splice(@connections, $index, 1);
   }
   if (@connections == 0) {
     undef $connection_reaper;

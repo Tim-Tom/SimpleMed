@@ -16,8 +16,6 @@ use Scalar::Util qw(weaken);
 
 use SimpleMed::Config qw(%Config);
 
-use Data::Printer;
-
 sub new($class) {
   my %c = $Config{database}->%*;
   my $dsn = "DBI:$c{driver}:host=$c{host};db=$c{database}";
