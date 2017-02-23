@@ -56,15 +56,13 @@ sub put($path, $route) {
 }
 
 sub forward($req, $env, $path, $params=undef) {
-  my $fullPath;
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(301, ['Location' => $fullPath], '');
+  $req->send_response(301, ['Location' => $path], '');
 }
 
 sub redirect($req, $env, $path, $params=undef) {
-  my $fullPath;
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(303, ['Location' => $fullPath]);
+  $req->send_response(303, ['Location' => $path], '');
 }
 
 sub template($req, $env, $template, $params=undef) {

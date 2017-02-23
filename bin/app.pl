@@ -34,7 +34,13 @@ BEGIN {
 }
 
 use SimpleMed;
+use SimpleMed::Core;
+use SimpleMed::DatabasePool;
 
+{
+  my $conn = SimpleMed::DatabasePool::AcquireConnection();
+  SimpleMed::Core::LoadAll($conn);
+}
 
 my $runner = Feersum::Runner->new(
   listen => ['localhost:5000'],

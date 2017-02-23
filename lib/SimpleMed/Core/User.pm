@@ -17,10 +17,13 @@ use SimpleMed::Common qw(omit);
 
 our %cache;
 
+my @db_keys = qw(user_id username password status);
+my $db_columns = join(', ', @db_keys);
+
 sub load($dbh) {
-  my $sth = $dbh->prepare('SELECT user_id, username, password, status FROM app.users') or die {message => $dbh->errstr, code => 500 };
-  $sth->execute() or die {message => $sth->errstr, code => 500 };
-  while(my $user = $sth->fetchrow_hashref()) {
+  my @rows = $dbh->execute("SELECT $db_columns FROM app.users");
+  for my $row (@rows) {
+    my $user = { map { $db_keys[$_] => $row->[$_] } 0 .. $#db_keys };
     $cache{$user->{username}} = $user;
   }
   return scalar keys %cache;

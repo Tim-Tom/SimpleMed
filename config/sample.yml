@@ -17,7 +17,7 @@ database:
   driver: 'Pg'
   database: 'SimpleMed'
   host: 'localhost'
-  username: 'SimpleMedApplication'
+  username: 'simplemedapplication'
   password: 'password'
   # The maximum number of connections to hold open at any time
   maxConnections: 3

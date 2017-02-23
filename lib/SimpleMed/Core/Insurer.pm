@@ -23,10 +23,13 @@ sub omit {
   return map { $_ => $hash->{$_} } grep { my $k = $_; !grep { $_  eq $k } @keys } keys %$hash;
 }
 
+my @db_keys = qw(insurance_id company phone address notes);
+my $db_columns = join(', ', @db_keys);
+
 sub load($dbh) {
-  my $sth = $dbh->prepare('SELECT insurance_id, company, phone, address, notes FROM app.insurance_info') or die {message => $dbh->errstr, code => 500 };
-  $sth->execute() or die {message => $sth->errstr, code => 500 };
-  while(my $insurer = $sth->fetchrow_hashref()) {
+  my @rows = $dbh->execute("SELECT $db_columns FROM app.insurance_info");
+  foreach my $row (@rows) {
+    my $insurer = { map { $db_keys[$_] => $row->[$_] } 0 .. $#db_keys };
     $cache{$insurer->{insurance_id}} = $insurer;
   }
   return scalar keys %cache;

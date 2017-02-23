@@ -19,7 +19,7 @@ use SimpleMed::Database;
 use SimpleMed::Config qw(%Config);
 
 const my $max_conn => $Config{database}{max_connections};
-const my $reap_threashold => $Config{database}{connection_reap_threshold};
+const my $reap_threshold => $Config{database}{connection_reap_threshold};
 
 my @connections;
 my @available_connections;
@@ -47,12 +47,12 @@ package SimpleMed::AcquiredDatabaseConnection {
   }
 };
 
-sub acquire {
+sub AcquireConnection {
   if (@available_connections) {
-    my $connection_available = @available_connections
+    my $connection_available = @available_connections;
     $min_connection_available = $connection_available if $connection_available < $min_connection_available;
     return SimpleMed::AcquiredDatabaseConnection->new(pop(@available_connections));
-  } else if (@connections < $max_conn) {
+  } elsif (@connections < $max_conn) {
     my $conn = SimpleMed::Database->new();
     push(@connections, $conn);
     $min_connection_available = 0;
@@ -83,3 +83,5 @@ sub reap_connections {
   }
   $min_connection_available = @available_connections;
 }
+
+1;
