@@ -21,13 +21,14 @@ use AnyEvent::IO;
 use SimpleMed::Config qw(%Config);
 use SimpleMed::Routing qw(get);
 
+const my $buffer_size = $Config{static}{buffer_size};
+
 sub read_block($in, $out) {
-  my $len = $Config{static}{buffer_size};
-  aio_read $in, $len, sub($data) {
+  aio_read $in, $buffer_size, sub($data) {
     if (length($data) > 0) {
       $out->write($data);
     }
-    if (length($data) == $len) {
+    if (length($data) == $buffer_size) {
       read_block($in, $out);
     } else {
       $in->close();
@@ -42,7 +43,7 @@ sub get_static_file($req, $env, $mime, $filename) {
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
       die 404 unless $in;
-      if ($length < $Config{static}{buffer_size}) {
+      if ($length < $buffer_size) {
         aio_read $in, $length, sub($data) {
           $in->close();
           $req->send_response(200, ['Content-Type' => $mime], $data);
