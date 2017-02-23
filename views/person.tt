@@ -1,4 +1,4 @@
-{% use vars qw($first_name $middle_name $last_name $gender $birth_date $time_zone @addresses @phones @emergency_contacts @emails $insurer); %}
+{% use vars qw($first_name $middle_name $last_name $gender $birth_date $time_zone @addresses @phones @emergency_contacts @emails %insurer); %}
 <div id="person-details">
   <h1>Personal Details</h1>
   <table id="person-details-table">
@@ -88,12 +88,11 @@ END_EMAIL
       <th>Phone</th>
     </tr>
     {%
-      my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$settings{views}/partials/person_contact_row.tt", DELIMITERS => ['{%', '%}'], PREPEND => $fi_prepend) or die $Text::Template::ERROR;
       for my $person (@emergency_contacts) {
         my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails relationship phones);
         $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
         $data{phone} = $data{phones}[0]{number} if @{$data{emails}} > 0;
-        $OUT .= $template->fill_in(HASH => \%data);
+        $OUT .= template('partials/person_contact_row', \%data);
       }
     %}
   </table>
