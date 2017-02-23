@@ -21,7 +21,7 @@ use AnyEvent::IO;
 use SimpleMed::Config qw(%Config);
 use SimpleMed::Routing qw(get);
 
-const my $buffer_size = $Config{static}{buffer_size};
+const my $buffer_size => $Config{static}{buffer_size};
 
 sub read_block($in, $out) {
   aio_read $in, $buffer_size, sub($data) {
