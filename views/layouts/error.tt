@@ -13,7 +13,6 @@
   <h2>{% $summary %}</h2>
   <p>{% $message %}</p>
   {% no strict 'refs';
-      my %stash = %{__PACKAGE__ . '::' };
       my $print;
       $print = sub {
         my $val = shift;
@@ -22,7 +21,7 @@
           $result .= '<dl>';
           for my $key (keys %$val) {
             $result .= '<dt>' . e($key) . '</dt>';
-            $result .= '<dd> recursive print of ' . ($val->{$key}) . '</dd>';
+            $result .= '<dd>' . $print->($val->{$key}) . '</dd>';
           }
           $result .= '</dl>';
         } elsif (ref($val) eq 'ARRAY') {
@@ -30,13 +29,14 @@
           $result .= join('', map { '<li>' . $print->($_) . '</li>' } @$val);
           $result .= '</ul>';
         } elsif (ref($val) eq 'SCALAR') {
-          $result .= e($$_);
+          $result .= e($$val);
         } else {
-          $result .= e($_);
+          $result .= e($val);
         }
         return $result;
       };
       my $additional = '';
+      my %stash = %{__PACKAGE__ . '::' };
       while(my ($key, $val) = each %stash) {
         next if $key eq 'code' || $key eq 'summary' || $key eq 'message';
         if (%{$val}) {
