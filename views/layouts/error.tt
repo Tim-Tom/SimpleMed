@@ -12,6 +12,51 @@
 <div id="content">
   <h2>{% $summary %}</h2>
   <p>{% $message %}</p>
+  {% no strict 'refs';
+      my %stash = %{__PACKAGE__ . '::' };
+      my $print;
+      $print = sub {
+        my $val = shift;
+        my $result = '';
+        if (ref($val) eq 'HASH') {
+          $result .= '<dl>';
+          for my $key (keys %$val) {
+            $result .= '<dt>' . e($key) . '</dt>';
+            $result .= '<dd> recursive print of ' . ($val->{$key}) . '</dd>';
+          }
+          $result .= '</dl>';
+        } elsif (ref($val) eq 'ARRAY') {
+          $result .= '<ul>';
+          $result .= join('', map { '<li>' . $print->($_) . '</li>' } @$val);
+          $result .= '</ul>';
+        } elsif (ref($val) eq 'SCALAR') {
+          $result .= e($$_);
+        } else {
+          $result .= e($_);
+        }
+        return $result;
+      };
+      my $additional = '';
+      while(my ($key, $val) = each %stash) {
+        next if $key eq 'code' || $key eq 'summary' || $key eq 'message';
+        if (%{$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(\%{$val}) . '</dd>';
+        }
+        if(@{$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(\@{$val}) . '</dd>';
+        }
+        if(defined ${$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(${$val}) . '</dd>';
+        }
+      }
+      if ($additional) {
+        $OUT .= '<h2>Additional Information</h2>';
+        $OUT .= $additional;
+      }
+  %}
 </div>
 <div id="footer">
 Powered by <a href="http://perl.org/">Perl</a>.

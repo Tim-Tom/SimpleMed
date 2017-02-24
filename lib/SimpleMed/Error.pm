@@ -102,8 +102,7 @@ sub Handle_404($req, $env) {
 sub Handle_Invalid_Method($req, $env, @possible_methods) {
   my $path = $env->path;
   my $method = $env->method;
-  my $joined = join(', ', @possible_methods);
-  my $message = "$method is not a valid http method for $path. The following methods are supported: $joined";
+  my $message = "$method is not a valid http method for $path.";
   return Handle_Error($req, $env, { code => 405, possible => \@possible_methods, message => $message });
 }
 
