@@ -1,3 +1,4 @@
+{% use vars qw(@phones $person_id); %}
 <div id="person-phone">
   <h1>Phone Numbers</h1>
   <form method="post">

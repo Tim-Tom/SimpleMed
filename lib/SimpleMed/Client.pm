@@ -85,8 +85,8 @@ my @detail_keys = qw(first_name middle_name last_name gender birth_date time_zon
 
 post '/people/new' => req_login sub($req, $env) {
   my ($new, $final);
-  $new = read_params_flat @detail_keys;
-  $final = SimpleMed::Core::Person::create(database(), $new);
+  $new = $env->content;
+  $final = SimpleMed::Core::Person::create(SimpleMed::DatabasePool::AcquireConnection(), $new);
   redirect($req, $env, '/people/' . $final->{person_id});
 };
 

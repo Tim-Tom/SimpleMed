@@ -1,3 +1,4 @@
+{% use vars qw($person_id $first_name $middle_name $last_name $gender $birth_date $time_zone); %}
 <div id="person-details">
   <h1>Personal Details</h1>
   <form method="post">

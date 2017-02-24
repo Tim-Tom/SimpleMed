@@ -28,8 +28,6 @@ sub new($class) {
   my $self_w = $self;
   weaken($self_w);
   my $on_error = sub($dbh, $filename, $line, $fatal) {
-    p($self_w->{statement});
-    p($self_w->{params});
     $self_w->{query_cv}->croak({ code => 500, message => "Failed to execute database query", error => $@, statement => $self_w->{statement}, params => $self_w->{params}});
   };
   my $on_connect = sub($dbh, $success=undef) {

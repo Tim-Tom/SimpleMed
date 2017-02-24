@@ -91,9 +91,9 @@ sub get {
 }
 
 sub create($dbh, $new_person) {
-  my $sth = $dbh->prepare('INSERT INTO app.people (first_name, middle_name, last_name, gender, birth_date, time_zone) VALUES (?, ?, ?, ?, ?, ?) RETURNING person_id, first_name, middle_name, last_name, gender, birth_date, time_zone;');
-  $sth->execute($new_person->@{qw(first_name middle_name last_name gender birth_date time_zone)}) or die { message => $sth->errstr, code => 500 };
-  my $person = $sth->fetchrow_hashref();
+  my $query = "INSERT INTO app.people ($db_columns) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?) RETURNING $db_columns;";
+  my @rows = $dbh->execute($query, $new_person->@{qw(first_name middle_name last_name gender birth_date time_zone)});
+  my $person = { map { $db_keys[$_] => $rows[0][$_] } 0 .. $#db_keys };
   $cache{$person->{person_id}} = $person;
   $person->{addresses} = [];
   $person->{emails} = [];
@@ -105,8 +105,7 @@ sub create($dbh, $new_person) {
 
 sub update($dbh, $person_id, $updated_person, @attributes) {
   my $cols = join(', ', map { "$_ = ?" } @attributes);
-  my $sth = $dbh->prepare("UPDATE app.people SET $cols WHERE person_id = ?");
-  $sth->execute($updated_person->@{@attributes}, $person_id) or die { message => $sth->errstr, code => 500 };
+  $dbh->execute("UPDATE app.people SET $cols WHERE person_id = ?", $updated_person->@{@attributes});
   my $person = $cache{$person_id};
   $person->@{@attributes} = $updated_person->@{@attributes};
   return clean_person $person;

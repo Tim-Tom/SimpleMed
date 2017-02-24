@@ -1,8 +1,9 @@
+{% use vars qw(@addresses $person_id); %}
 <div id="person-address">
   <h1>Addresses</h1>
   <form method="post">
     <table id="person-address-table">
-{% use strict; use warnings;
+      {%
       return join('', map {
           my $address = $addresses[$_] // {};
           my ($type, $addr) = map { e $address->{$_} } qw(type address);
