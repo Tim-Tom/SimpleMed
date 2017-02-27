@@ -83,6 +83,10 @@ sub Handle_Error($req, $env, $error) {
     %error = (
       code => $error,
     );
+  } else {
+    %error = (
+      message => $error
+    );
   }
   $error{code} ||= 500;
   $error{summary} ||= $default_summary{$error{code}};
