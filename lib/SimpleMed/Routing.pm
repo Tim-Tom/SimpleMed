@@ -57,12 +57,12 @@ sub put($path, $route) {
 
 sub forward($req, $env, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(301, ['Location' => $path], '');
+  $req->send_response(301, ['Location' => $path, 'Connection' => 'Close'], '');
 }
 
 sub redirect($req, $env, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(303, ['Location' => $path], '');
+  $req->send_response(303, ['Location' => $path, 'Connection' => 'Close'], '');
 }
 
 sub template($req, $env, $template, $params=undef) {
@@ -73,8 +73,7 @@ sub template($req, $env, $template, $params=undef) {
 }
 
 sub param($req, $env, @stuff) {
-  p($env);
-  die;
+  die "This should be dying";
 }
 
 sub uparam {
