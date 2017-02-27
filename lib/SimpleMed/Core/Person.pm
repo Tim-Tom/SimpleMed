@@ -105,7 +105,7 @@ sub create($dbh, $new_person) {
 
 sub update($dbh, $person_id, $updated_person, @attributes) {
   my $cols = join(', ', map { "$_ = ?" } @attributes);
-  $dbh->execute("UPDATE app.people SET $cols WHERE person_id = ?", $updated_person->@{@attributes});
+  $dbh->execute("UPDATE app.people SET $cols WHERE person_id = ?", $updated_person->@{@attributes}, $person_id);
   my $person = $cache{$person_id};
   $person->@{@attributes} = $updated_person->@{@attributes};
   return clean_person $person;

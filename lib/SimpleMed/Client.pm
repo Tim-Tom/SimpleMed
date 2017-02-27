@@ -26,6 +26,8 @@ get '/info' => req_login sub($req, $env) {
 };
 
 get '/login' => sub($req, $env) {
+  use Data::Printer;
+  say "First request on login, does it work?";
   p($env);
   template($req, $env, 'login', { error => '', destination => param('destination') || '/' });
 };
@@ -92,14 +94,14 @@ post '/people/new' => req_login sub($req, $env) {
 
 post '/people/:id/editDetails' => req_login sub($req, $env, $id) {
   my ($original, $new, $final);
-  $new = read_params_flat @detail_keys;
+  $new = $env->content;
   $original = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $original) {
     die { code => 404, message => 'Person does not exist' };
   }
   my @d = diff($original, $new, @detail_keys);
   if (@d) {
-    $final = SimpleMed::Core::Person::update(database(), $id, $new, @d);
+    $final = SimpleMed::Core::Person::update(SimpleMed::DatabasePool::AcquireConnection(), $id, $new, @d);
   } else {
     $final = $original;
   }
