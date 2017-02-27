@@ -17,22 +17,22 @@ use SimpleMed::Common qw(diff);
 use SimpleMed::Core;
 use SimpleMed::Routing qw(:methods :responses :params);
 
-get '/' => req_login sub($req, $env) {
-  forward($req, $env, '/people');
+get '/' => req_login sub($req) {
+  forward($req, '/people');
 };
 
-get '/info' => req_login sub($req, $env) {
-  template($req, $env, 'info');
+get '/info' => req_login sub($req) {
+  template($req, 'info');
 };
 
-get '/login' => sub($req, $env) {
+get '/login' => sub($req) {
   use Data::Printer;
   say "First request on login, does it work?";
-  p($env);
-  template($req, $env, 'login', { error => '', destination => param('destination') || '/' });
+  p($req);
+  template($req, 'login', { error => '', destination => param('destination') || '/' });
 };
 
-post '/login' => sub($req, $env) {
+post '/login' => sub($req) {
   die 500;
   my $username = param('username');
   my $password = param('password');
@@ -44,57 +44,57 @@ post '/login' => sub($req, $env) {
     $login_error = "$_->{code}: $_->{message}";
   };
 
-  return template($req, $env, 'login', { banner => { type => 'notification', message => $login_error }, destination => param('destination') || '/', username => $username }) if $login_error;
+  return template($req, 'login', { banner => { type => 'notification', message => $login_error }, destination => param('destination') || '/', username => $username }) if $login_error;
 
-  session($req, $env, $_ => $user->{$_} ) foreach keys %$user;
+  session($req, $_ => $user->{$_} ) foreach keys %$user;
 
-  redirect($req, $env, param($req, $env, 'destination') || '/');
+  redirect($req, param($req, 'destination') || '/');
 };
 
-get '/people' => req_login sub($req, $env) {
-  template($req, $env, 'people', { people => [SimpleMed::Core::Person::get()] });
+get '/people' => req_login sub($req) {
+  template($req, 'people', { people => [SimpleMed::Core::Person::get()] });
 };
 
-get '/people/new' => req_login sub($req, $env) {
+get '/people/new' => req_login sub($req) {
   my $result = {
     person_id => 'new',
     time_zone => 'America/Los_Angeles'
    };
-  template($req, $env, 'editPerson/details', $result);
+  template($req, 'editPerson/details', $result);
 };
 
-get '/people/:id' => req_login sub($req, $env, $id) {
+get '/people/:id' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, $env, 'person', $result);
+  template($req, 'person', $result);
 };
 
-get '/people/:id/editDetails' => req_login sub($req, $env, $id) {
+get '/people/:id/editDetails' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, $env, 'editPerson/details', $result);
+  template($req, 'editPerson/details', $result);
 };
 
-sub read_params_flat($req, $env, @args) {
-  return { map { $_ => uparam($req, $env, $_) } @args };
+sub read_params_flat($req, @args) {
+  return { map { $_ => uparam($req, $_) } @args };
 }
 
 my @detail_keys = qw(first_name middle_name last_name gender birth_date time_zone);
 
-post '/people/new' => req_login sub($req, $env) {
+post '/people/new' => req_login sub($req) {
   my ($new, $final);
-  $new = $env->content;
+  $new = $req->content;
   $final = SimpleMed::Core::Person::create(SimpleMed::DatabasePool::AcquireConnection(), $new);
-  redirect($req, $env, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->{person_id});
 };
 
-post '/people/:id/editDetails' => req_login sub($req, $env, $id) {
+post '/people/:id/editDetails' => req_login sub($req, $id) {
   my ($original, $new, $final);
-  $new = $env->content;
+  $new = $req->content;
   $original = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $original) {
     die { code => 404, message => 'Person does not exist' };
@@ -105,31 +105,31 @@ post '/people/:id/editDetails' => req_login sub($req, $env, $id) {
   } else {
     $final = $original;
   }
-  redirect($req, $env, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->{person_id});
 };
 
-get '/people/:id/editAddresses' => req_login sub($req, $env, $id) {
+get '/people/:id/editAddresses' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, $env, 'editPerson/addresses', $result);
+  template($req, 'editPerson/addresses', $result);
 };
 
-get '/people/:id/editPhones' => req_login sub($req, $env, $id) {
+get '/people/:id/editPhones' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, $env, 'editPerson/phones', $result);
+  template($req, 'editPerson/phones', $result);
 };
 
-get '/people/:id/editEmails' => req_login sub($req, $env, $id) {
+get '/people/:id/editEmails' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, $env, 'editPerson/emails', $result);
+  template($req, 'editPerson/emails', $result);
 };
 
 1;

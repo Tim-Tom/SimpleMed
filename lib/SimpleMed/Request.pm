@@ -5,6 +5,12 @@ use v5.24;
 use strict;
 use warnings;
 
+no warnings 'experimental::signatures';
+use feature 'signatures';
+
+no warnings 'experimental::postderef';
+use feature 'postderef';
+
 use parent qw(Plack::Request);
 use Carp qw(croak);
 
@@ -17,6 +23,13 @@ use SimpleMed::Request::UrlEncoded;
 use SimpleMed::Request::JSON;
 use SimpleMed::Request::YAML;
 
+sub new {
+  my ($class, $req) = @_;
+  my $self = Plack::Request::new($class, $req->env);
+  $self->{request} = $req;
+  return $self;
+}
+
 sub _parse_content_type {
   my $ct = lc shift;
   my $tspecials = '\s' . quotemeta '()<>@,;:\\"/[]?= ';
@@ -26,8 +39,6 @@ sub _parse_content_type {
     croak("Could not parse $ct");
   }
 }
-
-
 
 my %parsers = (
   'application/x-www-form-urlencoded' => ['iso-8859-1', \&SimpleMed::Request::UrlEncoded::parse],
@@ -101,4 +112,14 @@ sub _body_parameters {
 
 sub _parse_request_body {
   croak "_parse_request_body is not supported.";
+}
+
+sub send_response($self, $code, $headers, $body) {
+  my @headers = (Connection => 'Close', @$headers);
+  $self->{request}->send_response($code, \@headers, $body);
+}
+
+sub start_streaming($self, $code, $headers) {
+  my @headers = (Connection => 'Close', @$headers);
+  $self->{request}->start_streaming($code, \@headers);
 }

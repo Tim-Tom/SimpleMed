@@ -25,9 +25,9 @@ use SimpleMed::StaticFile;
 use SimpleMed::Client;
 use SimpleMed::Error;
 
-sub Application($req) {
+sub Application($feer_req) {
   # todo: wrap in try/catch
-  my $env = SimpleMed::Request->new($req->env);
+  my $req = SimpleMed::Request->new($feer_req);
   my @possible_methods;
   # For now just build a simple awful regex based matcher. I wrote what could have been a
   # simple parser for this class of problem a couple years ago in C#. I could do so now,
@@ -39,23 +39,23 @@ sub Application($req) {
   # iteratively.
   foreach my $route (@SimpleMed::Routing::Routes) {
     my ($method, $regex, $handler) = @$route;
-    my $correct_route = ($env->path =~ $regex);
+    my $correct_route = ($req->path =~ $regex);
     next unless $correct_route;
-    if ($method ne $env->method) {
+    if ($method ne $req->method) {
       push(@possible_methods, $method);
     } else {
       try {
-        $handler->($req, $env);
+        $handler->($req);
       } catch {
-        SimpleMed::Error::Handle_Error($req, $env, $_);
+        SimpleMed::Error::Handle_Error($req, $_);
       };
       return;
     }
   }
   if (@possible_methods) {
-    return SimpleMed::Error::Handle_Invalid_Method($req, $env, @possible_methods);
+    return SimpleMed::Error::Handle_Invalid_Method($req, @possible_methods);
   } else {
-    return SimpleMed::Error::Handle_404($req, $env);
+    return SimpleMed::Error::Handle_404($req);
   }
 }
 

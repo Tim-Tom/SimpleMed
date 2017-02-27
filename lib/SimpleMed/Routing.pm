@@ -33,8 +33,8 @@ sub make_handler($path, $route) {
   my $handler;
   my @matches;
   if ($repath =~ s!\\:(\w+)!push(@matches, $1); "(?<$1>[^/]+)"!ge) {
-    $handler = sub($req, $env) {
-      $route->($req, $env, @+{@matches});
+    $handler = sub($req) {
+      $route->($req, @+{@matches});
     };
   } else {
     $handler = $route;
@@ -55,24 +55,24 @@ sub put($path, $route) {
   push(@Routes, ['PUT', make_handler($path, $route)]);
 }
 
-sub forward($req, $env, $path, $params=undef) {
+sub forward($req, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
   $req->send_response(301, ['Location' => $path, 'Connection' => 'Close'], '');
 }
 
-sub redirect($req, $env, $path, $params=undef) {
+sub redirect($req, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
   $req->send_response(303, ['Location' => $path, 'Connection' => 'Close'], '');
 }
 
-sub template($req, $env, $template, $params=undef) {
+sub template($req, $template, $params=undef) {
   my $inner_content = SimpleMed::Template::template($template, $params);
   my $content = SimpleMed::Template::template('layouts/main', { content => $inner_content });
   $content = encode_utf8($content);
   $req->send_response(200, ['Content-Type' => 'text/html; charset=utf-8'], $content);
 }
 
-sub param($req, $env, @stuff) {
+sub param($req, @stuff) {
   die "This should be dying";
 }
 
@@ -84,10 +84,10 @@ sub session {
   die;
 }
 
-sub check_session($req, $env) {
+sub check_session($req) {
   # I don't really have security permissions in place right now. It's assumed everyone who
   # has a session is an admin at this point and has access to all the data.
-  my $role = session($req, $env, 'user_id');
+  my $role = session($req, 'user_id');
   if (!defined $role) {
     forward('/login', { destination => request->dispatch_path });
   }

@@ -37,7 +37,7 @@ sub read_block($in, $out) {
   };
 }
 
-sub get_static_file($req, $env, $mime, $filename) {
+sub get_static_file($req, $mime, $filename) {
   aio_stat $filename, sub($success=undef) {
     die 404 unless $success;
     my $length = -s _;
@@ -75,8 +75,8 @@ if ($Config{static}{enabled}) {
 
   foreach my $filename (@files) {
     my $mime = Plack::MIME->mime_type($filename);
-    get substr($filename, length 'public') => sub($req, $env) {
-      get_static_file($req, $env, $mime, $filename);
+    get substr($filename, length 'public') => sub($req) {
+      get_static_file($req, $mime, $filename);
     };
   }
 }

@@ -66,7 +66,7 @@ while(my ($k, $v) = each $jc->%*) {
   $json_encoder->$k($v);
 }
 
-sub Handle_Error($req, $env, $error) {
+sub Handle_Error($req, $error) {
   my %error;
   my $errType = ref($error);
   if ($errType) {
@@ -90,24 +90,24 @@ sub Handle_Error($req, $env, $error) {
   }
   $error{code} ||= 500;
   $error{summary} ||= $default_summary{$error{code}};
-  if ($env->path =~ m!^/api/json!) {
+  if ($req->path =~ m!^/api/json!) {
     send_error_json($req, \%error);
-  } elsif ($env->path =~ m!^/api/yaml!) {
+  } elsif ($req->path =~ m!^/api/yaml!) {
     send_error_yaml($req, \%error);
   } else {
     send_error_template($req, \%error);
   }
 }
 
-sub Handle_404($req, $env) {
-  return Handle_Error($req, $env, { code => 404, message => "The resource requested at ".($env->path)." does not exist." });
+sub Handle_404($req) {
+  return Handle_Error($req, { code => 404, message => "The resource requested at ".($req->path)." does not exist." });
 }
 
-sub Handle_Invalid_Method($req, $env, @possible_methods) {
-  my $path = $env->path;
-  my $method = $env->method;
+sub Handle_Invalid_Method($req, @possible_methods) {
+  my $path = $req->path;
+  my $method = $req->method;
   my $message = "$method is not a valid http method for $path.";
-  return Handle_Error($req, $env, { code => 405, possible => \@possible_methods, message => $message });
+  return Handle_Error($req, { code => 405, possible => \@possible_methods, message => $message });
 }
 
 sub send_error_template($req, $error) {
