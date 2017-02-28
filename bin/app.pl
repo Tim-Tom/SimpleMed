@@ -52,5 +52,5 @@ my $runner = Feersum::Runner->new(
   quiet => 0,
 );
 
-Info('Server starting', { server => $server, port => $port });
+Info(q^Server starting^, { server => $server, port => $port });
 $runner->run(\&SimpleMed::Application);

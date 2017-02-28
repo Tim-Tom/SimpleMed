@@ -28,6 +28,7 @@ use SimpleMed::Error;
 sub Application($feer_req) {
   # todo: wrap in try/catch
   my $req = SimpleMed::Request->new($feer_req);
+  $req->info(q^Request Received^, { method => $req->method, path => $req->path });
   my @possible_methods;
   # For now just build a simple awful regex based matcher. I wrote what could have been a
   # simple parser for this class of problem a couple years ago in C#. I could do so now,

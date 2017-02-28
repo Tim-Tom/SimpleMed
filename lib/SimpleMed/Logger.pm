@@ -85,48 +85,48 @@ sub get_logger {
   return $Logger;
 }
 
-sub trace($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('trace', $message_id, $payload, $opts);
+sub trace($self, $message_id, $payload={}, @opts) {
+  $self->_log('trace', $message_id, $payload, @opts);
 }
 
 sub Trace {
   get_logger->trace(@_);
 }
 
-sub debug($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('debug', $message_id, $payload, $opts);
+sub debug($self, $message_id, $payload={}, @opts) {
+  $self->_log('debug', $message_id, $payload, @opts);
 }
 
 sub Debug {
   get_logger->debug(@_);
 }
 
-sub info($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('info', $message_id, $payload, $opts);
+sub info($self, $message_id, $payload={}, @opts) {
+  $self->_log('info', $message_id, $payload, @opts);
 }
 
 sub Info {
   get_logger->info(@_);
 }
 
-sub warn($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('warn', $message_id, $payload, $opts);
+sub warn($self, $message_id, $payload={}, @opts) {
+  $self->_log('warn', $message_id, $payload, @opts);
 }
 
 sub Warn {
   get_logger->warn(@_);
 }
 
-sub error($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('error', $message_id, $payload, $opts);
+sub error($self, $message_id, $payload={}, @opts) {
+  $self->_log('error', $message_id, $payload, @opts);
 }
 
 sub Error {
   get_logger->error(@_);
 }
 
-sub fatal($self, $message_id, $payload={}, $opts={}) {
-  $self->_log('fatal', $message_id, $payload, $opts);
+sub fatal($self, $message_id, $payload={}, @opts) {
+  $self->_log('fatal', $message_id, $payload, @opts);
 }
 
 sub Fatal {
@@ -135,7 +135,7 @@ sub Fatal {
 
 my $log_sequence_id = 0;
 
-sub _log($self, $level, $message_id, $payload, $opts) {
+sub _log($self, $level, $message_id, $payload, @opts) {
   my @adapters = grep { $_->handles($level) } @{$self->{adapters}};
   return unless @adapters;
   $payload = ref($payload) eq 'CODE' ? $payload->() : $payload;
@@ -143,7 +143,7 @@ sub _log($self, $level, $message_id, $payload, $opts) {
     level => $level,
     pid => $$,
     sequence_id => ++$log_sequence_id,
-    $opts->%*,
+    @opts,
     message_id => $message_id,
     payload => $payload
   );

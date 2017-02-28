@@ -22,6 +22,7 @@ use Compress::LZW qw();
 use SimpleMed::Request::UrlEncoded;
 use SimpleMed::Request::JSON;
 use SimpleMed::Request::YAML;
+use SimpleMed::Logger;
 
 my $request_id = 0;
 
@@ -30,6 +31,7 @@ sub new {
   my $self = Plack::Request::new($class, $req->env);
   $self->{request} = $req;
   $self->{request_id} = ++$request_id;
+  $self->{logger} = SimpleMed::Logger::get_logger();
   return $self;
 }
 
@@ -125,4 +127,28 @@ sub send_response($self, $code, $headers, $body) {
 sub start_streaming($self, $code, $headers) {
   my @headers = (Connection => 'Close', @$headers);
   $self->{request}->start_streaming($code, \@headers);
+}
+
+sub trace($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->trace($message_id, $payload, @opts, request_id => $self->{request_id});
+}
+
+sub debug($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->trace($message_id, $payload, @opts, request_id => $self->{request_id});
+}
+
+sub info($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->info($message_id, $payload, @opts, request_id => $self->{request_id});
+}
+
+sub warn($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->warn($message_id, $payload, @opts, request_id => $self->{request_id});
+}
+
+sub error($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->error($message_id, $payload, @opts, request_id => $self->{request_id});
+}
+
+sub fatal($self, $message_id, $payload={}, @opts) {
+  $self->{logger}->fatal($message_id, $payload, @opts, request_id => $self->{request_id});
 }
