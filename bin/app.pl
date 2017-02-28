@@ -33,6 +33,8 @@ BEGIN {
   SimpleMed::Config::create($config, $root);
 }
 
+use SimpleMed::Logger qw(:methods);
+
 use SimpleMed;
 use SimpleMed::Core;
 use SimpleMed::DatabasePool;
@@ -42,10 +44,13 @@ use SimpleMed::DatabasePool;
   SimpleMed::Core::LoadAll($conn);
 }
 
+my ($server, $port) = qw(localhost 5000);
+
 my $runner = Feersum::Runner->new(
-  listen => ['localhost:5000'],
+  listen => ["$server:$port"],
   pre_fork => 0,
   quiet => 0,
- );
+);
 
+Info('Server starting', { server => $server, port => $port });
 $runner->run(\&SimpleMed::Application);

@@ -2,6 +2,26 @@
 # own developer specific config so that nothing gets checked into the repository.
 
 # Logging information...
+logging:
+  adapters:
+    - levels: [trace, debug, info, warn, error, fatal]
+      provider:
+        class: console
+      formatter:
+        class: console
+        colored: true
+    - levels: [info, warn]
+      provider:
+        class: file
+        filename: logs/info.yaml
+      formatter:
+        class: yaml
+    - levels: [warn, error, fatal]
+      provider:
+        class: file
+        filename: logs/error.json
+      formatter:
+        class: json
 
 # Templates
 template:
@@ -14,13 +34,13 @@ static:
 
 # Database Information
 database:
-  driver: 'Pg'
-  database: 'SimpleMed'
-  host: 'localhost'
-  username: 'simplemedapplication'
-  password: 'password'
+  driver: Pg
+  database: SimpleMed
+  host: localhost
+  username: simplemedapplication
+  password: password
   # The maximum number of connections to hold open at any time
-  maxConnections: 3
+  max_connections: 3
   # The amount of time in seconds to leave a connection idle before closing it
   connection_reap_threshold: 60
   params:
