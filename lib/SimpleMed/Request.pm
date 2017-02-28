@@ -14,7 +14,7 @@ use feature 'postderef';
 use parent qw(Plack::Request);
 use Carp qw(croak);
 
-use Encode qw(encode decode);
+use Encode qw(decode);
 use IO::Uncompress::Unzip qw(unzip);
 use IO::Uncompress::Gunzip qw(gunzip);
 use Compress::LZW qw();
@@ -23,10 +23,13 @@ use SimpleMed::Request::UrlEncoded;
 use SimpleMed::Request::JSON;
 use SimpleMed::Request::YAML;
 
+my $request_id = 0;
+
 sub new {
   my ($class, $req) = @_;
   my $self = Plack::Request::new($class, $req->env);
   $self->{request} = $req;
+  $self->{request_id} = ++$request_id;
   return $self;
 }
 
