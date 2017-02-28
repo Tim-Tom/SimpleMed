@@ -22,12 +22,6 @@ sub new($class, $args) {
 
 sub send_data($self, $formatted, $data) {
   my $proxy;
-  use Data::Printer;
-  my %args = (
-    formatted => $formatted,
-    data => $data
-  );
-  p(%args);
   if ($data->{level} eq 'error' || $data->{level} eq 'warning' || $data->{level} eq 'fatal') {
     $proxy = $self->{err};
   } else {
