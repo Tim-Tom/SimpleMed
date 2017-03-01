@@ -21,21 +21,13 @@ sub new($class, $args) {
 
 sub format_data($self, $data) {
   my %payload = %{$data->{payload}};
-  my ($id, $message);
-  if ($data->{message_id} =~ /^\d+$/) {
-    $id = $data->{message_id};
-    $message = 'Not Yet Implemented';
-  } else {
-    $id = '00000';
-    $message = $data->{message_id};
-  }
   if (%payload) {
     my $payload = np(%payload, %$self);
     $payload =~ s/{\n//;
     $payload =~ s/}\Z//m;
-    return sprintf "%s: [%s] %s:\n%s", $data->{level}, $id, $message, $payload;
+    return sprintf "%s: [%s] %s:\n%s", $data->{level}, $data->{message_id}, $data->{message}, $payload;
   } else {
-    return sprintf "%s: [%s] %s\n", $data->{level}, $id, $message;
+    return sprintf "%s: [%s] %s\n", $data->{level}, $data->{message_id}, $data->{message};
   }
 }
 

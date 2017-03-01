@@ -3,6 +3,7 @@
 
 # Logging information...
 logging:
+  messages: log-messages.yml
   adapters:
     - levels: [trace, debug, info, warn, error, fatal]
       provider:

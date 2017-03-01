@@ -19,6 +19,11 @@ use feature 'signatures';
 no warnings 'experimental::postderef';
 use feature 'postderef';
 
+use File::Slurp qw(read_file);
+use Unicode::UTF8 qw(decode_utf8);
+
+use YAML::XS;
+
 use SimpleMed::Config qw(%Config);
 
 use Exporter qw(import);
@@ -72,14 +77,16 @@ sub new($class, $config) {
   foreach my $adapt ($config->{adapters}->@*) {
     push(@adapters, SimpleMed::Logger::Adapter->new($adapt));
   }
-  return bless {adapters => \@adapters}, $class;
+  my $messages = YAML::XS::Load(decode_utf8(scalar read_file($Config{logging}{messages}, {binmode => ':raw' })));
+  return bless {adapters => \@adapters, messages => $messages}, $class;
 }
 
 sub get_logger {
   if (!defined $Logger) {
     $Logger = __PACKAGE__->new($Config{logging});
+    $Logger->debug(q^0001^, { filename => $Config{logging}{messages}, count => scalar keys $Logger->{messages}->%* });
     foreach my $adapt ($Config{logging}{adapters}->@*) {
-      $Logger->debug(q^Set up Log Source^, $adapt);
+      $Logger->debug(q^0002^, $adapt);
     }
   }
   return $Logger;
@@ -136,15 +143,22 @@ sub Fatal {
 my $log_sequence_id = 0;
 
 sub _log($self, $level, $message_id, $payload, @opts) {
+  my $message;
   my @adapters = grep { $_->handles($level) } @{$self->{adapters}};
   return unless @adapters;
   $payload = ref($payload) eq 'CODE' ? $payload->() : $payload;
+  if ($message_id =~ /^\d+$/) {
+    $message = $self->{messages}{$message_id} || 'Unknown';
+  } else {
+    ($message, $message_id) = ($message_id, '0000');
+  }
   my %data = (
     level => $level,
     pid => $$,
     sequence_id => ++$log_sequence_id,
     @opts,
     message_id => $message_id,
+    message => $message,
     payload => $payload
   );
   foreach my $adapter (@adapters) {
