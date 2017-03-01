@@ -163,7 +163,7 @@ sub trace($self, $message_id, $payload={}, @opts) {
 }
 
 sub debug($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->trace($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->debug($message_id, $payload, @opts, request_id => $self->{request_id});
 }
 
 sub info($self, $message_id, $payload={}, @opts) {
