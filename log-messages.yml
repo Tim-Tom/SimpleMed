@@ -5,3 +5,6 @@
 '0004': Request Received
 '0005': Request Completed
 '0006': Request resulted in error
+'0007': Connecting to database
+'0008': Database connection closed
+'0009': Executing query

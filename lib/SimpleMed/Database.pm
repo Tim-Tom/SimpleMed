@@ -15,6 +15,7 @@ use AnyEvent::DBI;
 use Scalar::Util qw(weaken);
 
 use SimpleMed::Config qw(%Config);
+use SimpleMed::Logger qw(:methods);
 
 sub new($class) {
   my %c = $Config{database}->%*;
@@ -37,9 +38,15 @@ sub new($class) {
       $self_w->{query_cv}->croak({ code => 500, message => "Failed to connect to database", error => $@ });
     }
   };
+  Debug(q^0007^, { connection => $dsn, username => $c{username}, password => ($c{password} ? '(with password)' : '(no password)'), instance => "SimpleMed::Database=$self" });
   $self->{dbh} = AnyEvent::DBI->new($dsn, $c{username}, $c{password}, PrintError => 0, $c{params}->%*, on_error => $on_error, on_connect => $on_connect);
   $self->{query_cv}->recv;
   return bless($self, $class);
+}
+
+sub DESTROY {
+  my $self = shift;
+  Debug(q^0008^, { instance => "$self" });
 }
 
 sub execute($self, $statement, @params) {
@@ -50,6 +57,7 @@ sub execute($self, $statement, @params) {
   } else {
     $self->{in_progress} = 1
   }
+  Debug(q^0009^, { statement => $statement, params => \@params });
   $self->{statement} = $statement;
   $self->{params} = \@params;
   $self->{query_cv} = AnyEvent->condvar;
