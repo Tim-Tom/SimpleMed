@@ -23,7 +23,7 @@ sub new($class, $args) {
 }
 
 sub format_data($self, $data) {
-  return $self->encode($data);
+  return $self->{encoder}->encode($data);
 }
 
 1;
