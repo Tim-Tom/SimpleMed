@@ -32,7 +32,13 @@ sub new {
   $self->{request} = $req;
   $self->{request_id} = ++$request_id;
   $self->{logger} = SimpleMed::Logger::get_logger();
+  $self->info(q^0004^, { method => $self->method, path => $self->path });
   return $self;
+}
+
+sub DESTROY {
+  my $self = shift;
+  $self->info(q^0005^, { response => $self->{response} });
 }
 
 sub _parse_content_type {
@@ -97,7 +103,6 @@ sub _parse_content {
   return $parser->(decode($charset, $body));
 }
 
-
 sub content {
   my $self = shift;
   $self->_parse_content;
@@ -121,12 +126,36 @@ sub _parse_request_body {
 
 sub send_response($self, $code, $headers, $body) {
   my @headers = (Connection => 'Close', @$headers);
+  $self->{response} = {
+    code => $code,
+    headers => {@headers},
+    streaming => 0,
+    length => scalar length $body
+  };
   $self->{request}->send_response($code, \@headers, $body);
 }
 
 sub start_streaming($self, $code, $headers) {
   my @headers = (Connection => 'Close', @$headers);
-  $self->{request}->start_streaming($code, \@headers);
+  $self->{response} = {
+    code => $code,
+    headers => {@headers},
+    streaming => 0,
+    length => 0
+  };
+  $self->{stream} = $self->{request}->start_streaming($code, \@headers);
+  return $self;
+}
+
+sub write($self, $data) {
+  die { code => 500, message => "Response stream not started" } unless $self->{stream};
+  $self->{response}{length} += length $data;
+  $self->{stream}->write($data);
+}
+
+sub close($self) {
+  die { code => 500, message => "Response stream not started" } unless $self->{stream};
+  $self->{stream}->close();
 }
 
 sub trace($self, $message_id, $payload={}, @opts) {
