@@ -57,12 +57,12 @@ sub put($path, $route) {
 
 sub forward($req, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(301, ['Location' => $path, 'Connection' => 'Close'], '');
+  $req->send_response(301, ['Location' => $path, 'Content-Type' => 'text/plain; charset=utf-8'], "Located at: $path");
 }
 
 sub redirect($req, $path, $params=undef) {
   $path .= '?' . build_urlencoded(%$params) if $params;
-  $req->send_response(303, ['Location' => $path, 'Connection' => 'Close'], '');
+  $req->send_response(303, ['Location' => $path, 'Content-Type' => 'text/plain; charset=utf-8'], "Response located at: $path");
 }
 
 sub template($req, $template, $params=undef) {
