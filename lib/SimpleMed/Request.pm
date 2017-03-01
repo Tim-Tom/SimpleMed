@@ -140,7 +140,7 @@ sub start_streaming($self, $code, $headers) {
   $self->{response} = {
     code => $code,
     headers => {@headers},
-    streaming => 0,
+    streaming => 1,
     length => 0
   };
   $self->{stream} = $self->{request}->start_streaming($code, \@headers);
