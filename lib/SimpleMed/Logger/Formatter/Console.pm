@@ -21,14 +21,18 @@ sub new($class, $args) {
 
 sub format_data($self, $data) {
   my %payload = %{$data->{payload}};
+  my ($payload, $fmt, $request, $sequence);
+  $fmt =  '[%d] %s: %s[%s] %s';
   if (%payload) {
-    my $payload = np(%payload, %$self);
+    $payload = np(%payload, %$self);
     $payload =~ s/{\n//;
     $payload =~ s/}\Z//m;
-    return sprintf "%s: [%s] %s:\n%s", $data->{level}, $data->{message_id}, $data->{message}, $payload;
+    $fmt .= ":\n%s";
   } else {
-    return sprintf "%s: [%s] %s\n", $data->{level}, $data->{message_id}, $data->{message};
+    $fmt .= "\n";
   }
+  $request = $data->{request_id} ? sprintf '[req:%d] ', $data->{request_id} : '';
+  return sprintf $fmt, $data->{sequence_id}, $data->{level}, $request, $data->{message_id}, $data->{message}, $payload;
 }
 
 1;
