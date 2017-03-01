@@ -90,6 +90,7 @@ sub Handle_Error($req, $error) {
   }
   $error{code} ||= 500;
   $error{summary} ||= $default_summary{$error{code}};
+  $req->error(q^0006^, { error => \%error });
   if ($req->path =~ m!^/api/json!) {
     send_error_json($req, \%error);
   } elsif ($req->path =~ m!^/api/yaml!) {

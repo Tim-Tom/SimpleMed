@@ -4,3 +4,4 @@
 '0003': Server starting
 '0004': Request Received
 '0005': Request Completed
+'0006': Request resulted in error
