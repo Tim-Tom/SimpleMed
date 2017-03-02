@@ -7,11 +7,12 @@
     <th>Phone</th>
   </tr>
   {%
+    my $template = get_template('partials/people_row');
     for my $person (@people) {
       my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails phones);
       $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
       $data{phone} = $data{phones}[0]{number} if @{$data{phones}} > 0;
-      $OUT .= template('partials/people_row', \%data);
+      $OUT .= $template->fill_in(HASH => \%data);
     }
   %}
 </table>

@@ -88,11 +88,12 @@ END_EMAIL
       <th>Phone</th>
     </tr>
     {%
+      my $template = get_template('partials/person_contact_row');
       for my $person (@emergency_contacts) {
         my %data = map { $_ => $person->{$_} } qw(person_id first_name last_name emails relationship phones);
         $data{email} = $data{emails}[0] if @{$data{emails}} > 0;
         $data{phone} = $data{phones}[0]{number} if @{$data{emails}} > 0;
-        $OUT .= template('partials/person_contact_row', \%data);
+        $OUT .= $template->fill_in(HASH => \%data);
       }
     %}
   </table>
