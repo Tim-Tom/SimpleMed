@@ -24,6 +24,8 @@ use SimpleMed::Request::JSON;
 use SimpleMed::Request::YAML;
 use SimpleMed::Logger;
 
+use Time::HiRes qw(gettimeofday tv_interval);
+
 my $request_id = 0;
 
 sub new {
@@ -32,6 +34,7 @@ sub new {
   $self->{request} = $req;
   $self->{request_id} = ++$request_id;
   $self->{logger} = SimpleMed::Logger::get_logger();
+  $self->{request_started} = [gettimeofday];
   $self->info(q^0004^, { method => $self->method, path => $self->path });
   return $self;
 }
@@ -159,25 +162,25 @@ sub close($self) {
 }
 
 sub trace($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->trace($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->trace($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }
 
 sub debug($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->debug($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->debug($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }
 
 sub info($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->info($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->info($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }
 
 sub warn($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->warn($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->warn($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }
 
 sub error($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->error($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->error($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }
 
 sub fatal($self, $message_id, $payload={}, @opts) {
-  $self->{logger}->fatal($message_id, $payload, @opts, request_id => $self->{request_id});
+  $self->{logger}->fatal($message_id, $payload, @opts, request_id => $self->{request_id}, elapsed => tv_interval($self->{request_started}));
 }

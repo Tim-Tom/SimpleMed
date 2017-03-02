@@ -31,7 +31,7 @@ sub format_data($self, $data) {
   } else {
     $fmt .= "\n";
   }
-  $request = $data->{request_id} ? sprintf '[req:%d] ', $data->{request_id} : '';
+  $request = $data->{request_id} ? sprintf '[req:%d %0.3f] ', $data->{request_id}, $data->{elapsed} : '';
   return sprintf $fmt, $data->{sequence_id}, $data->{level}, $request, $data->{message_id}, $data->{message}, $payload;
 }
 
