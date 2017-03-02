@@ -18,6 +18,7 @@ use AnyEvent;
 use AnyEvent::IO;
 
 use SimpleMed::Config qw(%Config);
+use SimpleMed::Logger qw(:methods);
 
 use Exporter qw(import);
 
@@ -43,8 +44,12 @@ sub read_template($filename) {
 
 sub get_template($template) {
   unless ($Config{template}{caching} && $templates{$template}) {
+    Debug(q^0010^, { template => $template });
     $templates{$template} = read_template("$Config{server}{views}/$template.tt");
-  };
+    Debug(q^0011^, { template => $template });
+  } else {
+    Debug(q^0012^, { template => $template });
+  }
   return $templates{$template};
 }
 

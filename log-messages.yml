@@ -8,3 +8,6 @@
 '0007': Connecting to database
 '0008': Database connection closed
 '0009': Executing query
+'0010': Loading template from disk
+'0011': Template loaded from disk
+'0012': Retrieving template from cache
