@@ -38,6 +38,7 @@ use SimpleMed::Logger qw(:methods);
 use SimpleMed;
 use SimpleMed::Core;
 use SimpleMed::DatabasePool;
+use SimpleMed::Views;
 
 {
   my $conn = SimpleMed::DatabasePool::AcquireConnection();

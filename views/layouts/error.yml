@@ -1,0 +1,2 @@
+variables: ['$summary', '$code', '$message']
+package: 'SimpleMed::Views'

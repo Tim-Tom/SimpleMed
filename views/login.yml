@@ -1,0 +1,2 @@
+variables: ['$username', '$destination']
+package: 'SimpleMed::Views'

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Error: <%- $summary || $code %></title>
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+<h1>Error: <%- $code %></h1>
+<div id="content">
+  <h2><%= $summary %></h2>
+  <p><%= $message %></p>
+  <%- no strict 'refs';
+      my $print;
+      $print = sub {
+        my $val = shift;
+        my $result = '';
+        if (ref($val) eq 'HASH') {
+          $result .= '<dl>';
+          for my $key (keys %$val) {
+            $result .= '<dt>' . e($key) . '</dt>';
+            $result .= '<dd>' . $print->($val->{$key}) . '</dd>';
+          }
+          $result .= '</dl>';
+        } elsif (ref($val) eq 'ARRAY') {
+          $result .= '<ul>';
+          $result .= join('', map { '<li>' . $print->($_) . '</li>' } @$val);
+          $result .= '</ul>';
+        } elsif (ref($val) eq 'SCALAR') {
+          $result .= e($$val);
+        } else {
+          $result .= e($val);
+        }
+        return $result;
+      };
+      my $additional = '';
+      my %stash = %{__PACKAGE__ . '::' };
+      while(my ($key, $val) = each %stash) {
+        next if $key eq 'code' || $key eq 'summary' || $key eq 'message';
+        if (%{$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(\%{$val}) . '</dd>';
+        }
+        if(@{$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(\@{$val}) . '</dd>';
+        }
+        if(defined ${$val}) {
+          $additional .= '<dt>' . e($key) . '</dt>';
+          $additional .= '<dd>' . $print->(${$val}) . '</dd>';
+        }
+      }
+      if ($additional) {
+        $OUT .= '<h2>Additional Information</h2>';
+        $OUT .= $additional;
+      }
+  %>
+</div>
+<div id="footer">
+Powered by <a href="http://perl.org/">Perl</a>.
+</div>
+</body>
+</html>
