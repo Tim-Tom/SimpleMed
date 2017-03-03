@@ -56,8 +56,7 @@ sub fill_in {
 sub _insert_text {
   my $self = shift;
   return unless $self->{buffer};
-  $self->{buffer} =~ s/\\/\\/g;
-  $self->{buffer} =~ s/([#$@%])/\$1/g;
+  $self->{buffer} =~ s/([#\$\@\%\\])/\\$1/g;
   $self->{line_no} += $self->{buffer} =~ s/\n/\\n/g;
   $self->{sub_text} .= '$OUT .= qq#' . $self->{buffer} . "#;\n";
   $self->{buffer} = '';
