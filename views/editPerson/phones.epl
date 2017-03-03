@@ -1,0 +1,20 @@
+<div id="person-phone">
+  <h1>Phone Numbers</h1>
+  <form method="post">
+    <table id="person-phone-table">
+    <%` for my $i (0 .. $#phones + 2) {
+      my ($t, $n);
+      if ($i < @phones) {
+        ($t, $n) = map { escape $phones[$i]{$_} } qw(type number);
+      } %>
+      <tr>
+        <th><%- qq(<input type="text" name="type_$i" id="person-phone-$i-type" value="$t" />) %></th>
+	<td><%- qq(<input type="tel"  name="address_$i" id="person-phone-$i-number" value="$n">) %></td>
+     </tr>
+    <%` } %>
+    </table>
+    <input type="submit" value="Save" />
+    <button type="reset" />Reset</button>
+    <a href="/people/<%- $person_id %>">Cancel</a>
+  </form>
+</div>

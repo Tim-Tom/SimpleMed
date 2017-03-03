@@ -1,0 +1,17 @@
+<div id="person-email">
+  <h1>Emails</h1>
+  <form method="post">
+    <ul id="person-email-list">
+    <%` for my $i (0 .. $#emails + 2) {
+      my $e;
+      if ($i < @emails) {
+        $e = escape $emails[$i];
+      } %>
+      <%- qq(<li><input type="email" name="email_$i", id="person-email-$i", value="$e" /></li>) %>
+    <%` } %>
+    </ul>
+    <input type="submit" value="Save" />
+    <button type="reset" />Reset</button>
+    <a href="/people/<%- $person_id %>">Cancel</a>
+  </form>
+</div>
