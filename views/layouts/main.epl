@@ -1,9 +1,8 @@
-{% use vars qw($title $content); %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>{% $title || 'SimpleMed' %}</title>
+  <title><%= $title || 'SimpleMed' %></title>
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/css/style.css">
   <!--
@@ -16,7 +15,7 @@
 
 </head>
 <body>
-{% $content %}
+<%- $content %>
 <div id="footer">
 Powered by <a href="http://perl.org/">Perl</a>
 </div>

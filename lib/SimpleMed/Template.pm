@@ -75,7 +75,9 @@ sub read_config($filename) {
       aio_read $in, $length, sub($data) {
         try {
           $in->close();
-          $config_read->send(YAML::XS::Load(decode_utf8($data)));
+          my $config = YAML::XS::Load(decode_utf8($data));
+          $config->{package} ||= 'SimpleMed::Views';
+          $config_read->send($config);
         } catch {
           $config_read->croak({ category => 'environment', message => "Unable to parse template configuration $filename: $_" });
         };

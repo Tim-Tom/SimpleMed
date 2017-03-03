@@ -1,2 +1,1 @@
 variables: ['$title', '$content']
-package: 'SimpleMed::Views'
