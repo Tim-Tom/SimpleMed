@@ -111,4 +111,14 @@ sub update($dbh, $person_id, $updated_person, @attributes) {
   return clean_person $person;
 }
 
+sub update_addresses($dbh, $person_id, @addresses) {
+  my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @addresses);
+  # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
+  my $person = $cache{$person_id};
+  $dbh->execute("DELETE FROM app.addresses;");
+  $dbh->execute("INSERT INTO app.addresses (person_id, order_id, type, address) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{type}, $_->{address} } @addresses);
+  $person->{addresses} = [map { { type => $_[0], address => $_[1] }; } $dbh->execute("SELECT type, address from app.addresses WHERE person_id = ? ORDER BY order_id", $person_id)];
+  return clean_person $person;
+}
+
 1;

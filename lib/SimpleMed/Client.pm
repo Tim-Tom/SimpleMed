@@ -116,6 +116,21 @@ get '/people/:id/editAddresses' => req_login sub($req, $id) {
   template($req, 'editPerson/addresses', $result);
 };
 
+post '/people/:id/editAddresses' => req_login sub($req, $id) {
+  my ($original, $new, @final);
+  my @new = sort {
+    my $res = $a->{order} <=> $b->{order};
+    die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
+    $res;
+  } @{$req->content->{address}};
+  $original = SimpleMed::Core::Person::find_by_id($id);
+  if (!defined $original) {
+    die { code => 404, message => 'Person does not exist' };
+  }
+  my $final = SimpleMed::Core::Person::update_addresses(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
+  redirect($req, '/people/' . $final->{person_id});
+};
+
 get '/people/:id/editPhones' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::Person::find_by_id($id);
   if (!defined $result) {

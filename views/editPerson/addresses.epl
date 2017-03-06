@@ -2,15 +2,22 @@
   <h1>Addresses</h1>
   <form method="post">
     <table id="person-address-table">
-    <%` for my $i (0 .. $#addresses + 2) {
-      my ($t, $a);
+      <tr>
+        <th>Order</th>
+        <th>Alias</th>
+        <th>Address</th>
+      </tr>
+    <%` my $max = @addresses + 2; for my $iv (1 .. $max) {
+      my ($t, $a, $i);
+      my $i = $iv - 1;
       if ($i < @addresses) {
         ($t, $a) = map { escape $addresses[$i]->{$_} } qw(type address);
         $a =~ s!<br />!\n!g;
       } %>
       <tr>
-        <th><%- qq(<input type="text" name="type_$i" id="person-address-$i-type" value="$t" />) %></th>
-        <td><%- qq(<textarea name="address_$i" id="person-address-$i-address" rows=4>$a</textarea>) %></td>
+        <td><%- qq(<input type="number" name="address-${i}-order" id="person-address-$i-order" value="$iv" min=1 max=$max />) %></td>
+        <td><%- qq(<input type="text" name="address-${i}-type" id="person-address-$i-type" value="$t" />) %></td>
+        <td><%- qq(<textarea name="address-${i}-address" id="person-address-$i-address" rows=4>$a</textarea>) %></td>
       </tr>
     <%` } %>
     </table>
