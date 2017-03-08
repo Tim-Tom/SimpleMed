@@ -37,6 +37,7 @@ use SimpleMed::Logger qw(:methods);
 
 use SimpleMed;
 use SimpleMed::Core;
+use SimpleMed::Routing;
 use SimpleMed::DatabasePool;
 use SimpleMed::Views;
 
@@ -44,6 +45,8 @@ use SimpleMed::Views;
   my $conn = SimpleMed::DatabasePool::AcquireConnection();
   SimpleMed::Core::LoadAll($conn);
 }
+
+SimpleMed::Routing::build_routes;
 
 my ($server, $port) = qw(localhost 5000);
 
