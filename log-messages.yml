@@ -11,3 +11,10 @@
 '0010': Loading template from disk
 '0011': Template loaded from disk
 '0012': Retrieving template from cache
+'0013': Adding Route
+'0014': Building Route Table
+'0015': Done Building Route Table
+'0016': Route table is dirty, rebuilding
+'0017': Updating Addresses
+'0018': Updating Emails
+'0019': Updating Phones

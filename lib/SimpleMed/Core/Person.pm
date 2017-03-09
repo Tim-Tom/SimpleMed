@@ -115,7 +115,7 @@ sub update($dbh, $person_id, $updated_person, @attributes) {
 sub update_addresses($dbh, $person_id, @addresses) {
   my $person = $cache{$person_id};
   my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @addresses);
-  Debug(q^Updating Addresses^, { person_id => $person_id, old => $person->{addresses}, new => \@addresses });
+  Debug(q^0017^, { person_id => $person_id, old => $person->{addresses}, new => \@addresses });
   # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
   $dbh->execute("DELETE FROM app.addresses wHERE person_id = ?;", $person_id);
   $dbh->execute("INSERT INTO app.addresses (person_id, order_id, type, address) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{type}, $_->{address} } @addresses);
@@ -126,7 +126,7 @@ sub update_addresses($dbh, $person_id, @addresses) {
 sub update_emails($dbh, $person_id, @emails) {
   my $person = $cache{$person_id};
   my $placeholders = join(', ', map { '(?, ?, ?)' } @emails);
-  Debug(q^Updating Emails^, { person_id => $person_id, old => $person->{emails}, new => \@emails });
+  Debug(q^0018^, { person_id => $person_id, old => $person->{emails}, new => \@emails });
   # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
   $dbh->execute("DELETE FROM app.contact_emails WHERE person_id = ?;", $person_id);
   $dbh->execute("INSERT INTO app.contact_emails (person_id, order_id, email) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{email} } @emails);
@@ -137,7 +137,7 @@ sub update_emails($dbh, $person_id, @emails) {
 sub update_phones($dbh, $person_id, @phones) {
   my $person = $cache{$person_id};
   my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @phones);
-  Debug(q^Updating Phones^, { person_id => $person_id, old => $person->{phones}, new => \@phones });
+  Debug(q^0019^, { person_id => $person_id, old => $person->{phones}, new => \@phones });
   # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
   $dbh->execute("DELETE FROM app.contact_phones wHERE person_id = ?;", $person_id);
   $dbh->execute("INSERT INTO app.contact_phones (person_id, order_id, type, number) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{type}, $_->{number} } @phones);

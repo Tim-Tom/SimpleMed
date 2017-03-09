@@ -45,7 +45,7 @@ sub prefix($path, $block) {
 
 sub add_handler($method, $path, $route) {
   $path = $Path_Prefix . $path;
-  Debug(q^Adding Route^, { method => $method, path => $path });
+  Debug(q^0013^, { method => $method, path => $path });
   my @parts = map { quotemeta "/$_" } split('/', $path);
   # Get rid of empty leading slash
   shift @parts;
@@ -102,18 +102,18 @@ sub build_route_re($m) {
 }
 
 sub build_routes() {
-  Debug(q^Building Route Table^, { num_routes => scalar @Routes, routes_dirty => $Routes_Dirty });
+  Debug(q^0014^, { num_routes => scalar @Routes, routes_dirty => $Routes_Dirty });
   $Routes = build_route_re(\%Routes);
   use re 'eval';
   $Routes = qr/\A$Routes/s;
   $Routes_Dirty = 0;
-  Debug(q^Done Building Route Table^);
+  Debug(q^0015^);
 }
 
 sub route($req) {
   try {
     if ($Routes_Dirty) {
-      Debug(q^Route table is dirty, rebuilding^);
+      Debug(q^0016^);
       build_routes if $Routes_Dirty;
     }
     if ($req->path =~ $Routes) {
