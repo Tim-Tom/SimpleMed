@@ -21,18 +21,20 @@ sub new($class, $args) {
 
 sub format_data($self, $data) {
   my %payload = %{$data->{payload}};
-  my ($payload, $fmt, $request, $sequence);
+  my ($fmt, $request, $sequence, @fmt_args);
   $fmt =  '[%d] %s: %s[%s] %s';
+  $request = $data->{request_id} ? sprintf '[req:%d %0.3f] ', $data->{request_id}, $data->{elapsed} : '';
+  @fmt_args = ($data->{sequence_id}, $data->{level}, $request, $data->{message_id}, $data->{message});
   if (%payload) {
-    $payload = np(%payload, %$self);
+    my $payload = np(%payload, %$self);
     $payload =~ s/{\n//;
     $payload =~ s/}\Z//m;
     $fmt .= ":\n%s";
+    push(@fmt_args, $payload);
   } else {
     $fmt .= "\n";
   }
-  $request = $data->{request_id} ? sprintf '[req:%d %0.3f] ', $data->{request_id}, $data->{elapsed} : '';
-  return sprintf $fmt, $data->{sequence_id}, $data->{level}, $request, $data->{message_id}, $data->{message}, $payload;
+  return sprintf $fmt, @fmt_args;
 }
 
 1;

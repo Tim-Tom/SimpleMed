@@ -2,14 +2,21 @@
   <h1>Phone Numbers</h1>
   <form method="post">
     <table id="person-phone-table">
-    <%` for my $i (0 .. $#phones + 2) {
-      my ($t, $n);
+      <tr>
+        <th>Order</th>
+        <th>Alias</th>
+        <th>Number</th>
+      </tr>
+    <%` my $max = @phones + 2; for my $iv (1 .. $max) {
+      my ($t, $n, $i);
+      $i = $iv - 1;
       if ($i < @phones) {
         ($t, $n) = map { escape $phones[$i]{$_} } qw(type number);
       } %>
       <tr>
-        <th><%- qq(<input type="text" name="type_$i" id="person-phone-$i-type" value="$t" />) %></th>
-	<td><%- qq(<input type="tel"  name="address_$i" id="person-phone-$i-number" value="$n">) %></td>
+        <td><%- qq(<input type="number" name="phones-$i-order" id="person-address-$i-order" value="$iv" min=1 max=$max />) %></td>
+        <td><%- qq(<input type="text" name="phones-$i-type" id="person-phone-$i-type" value="$t" />) %></td>
+	<td><%- qq(<input type="tel"  name="phones-$i-number" id="person-phone-$i-number" value="$n">) %></td>
      </tr>
     <%` } %>
     </table>

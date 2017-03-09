@@ -9,15 +9,15 @@
       </tr>
     <%` my $max = @addresses + 2; for my $iv (1 .. $max) {
       my ($t, $a, $i);
-      my $i = $iv - 1;
+      $i = $iv - 1;
       if ($i < @addresses) {
         ($t, $a) = map { escape $addresses[$i]->{$_} } qw(type address);
         $a =~ s!<br />!\n!g;
       } %>
       <tr>
-        <td><%- qq(<input type="number" name="address-${i}-order" id="person-address-$i-order" value="$iv" min=1 max=$max />) %></td>
-        <td><%- qq(<input type="text" name="address-${i}-type" id="person-address-$i-type" value="$t" />) %></td>
-        <td><%- qq(<textarea name="address-${i}-address" id="person-address-$i-address" rows=4>$a</textarea>) %></td>
+        <td><%- qq(<input type="number" name="addresses-$i-order" id="person-address-$i-order" value="$iv" min=1 max=$max />) %></td>
+        <td><%- qq(<input type="text" name="addresses-$i-type" id="person-address-$i-type" value="$t" />) %></td>
+        <td><%- qq(<textarea name="addresses-$i-address" id="person-address-$i-address" rows=4>$a</textarea>) %></td>
       </tr>
     <%` } %>
     </table>

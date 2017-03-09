@@ -13,6 +13,7 @@ use feature 'postderef';
 
 use SimpleMed::Core::Insurer;
 use SimpleMed::Common qw(clone omit);
+use SimpleMed::Logger qw(:methods);
 
 our %cache;
 
@@ -52,10 +53,10 @@ sub load($dbh) {
     push($cache{$person_id}{emails}->@*, $email);
   }
 
-  @rows = $dbh->execute('SELECT person_id, type, phone FROM app.contact_phones order by person_id, order_id');
+  @rows = $dbh->execute('SELECT person_id, type, number FROM app.contact_phones order by person_id, order_id');
   for my $row (@rows) {
-    my ($person_id, $type, $phone) = @$row;
-    push($cache{$person_id}{phones}->@*, {number => $phone, type => $type});
+    my ($person_id, $type, $number) = @$row;
+    push($cache{$person_id}{phones}->@*, {number => $number, type => $type});
   }
 
   @rows = $dbh->execute('SELECT person_id, contact_id, type FROM app.emergency_contacts order by person_id, order_id');
@@ -112,12 +113,35 @@ sub update($dbh, $person_id, $updated_person, @attributes) {
 }
 
 sub update_addresses($dbh, $person_id, @addresses) {
-  my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @addresses);
-  # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
   my $person = $cache{$person_id};
-  $dbh->execute("DELETE FROM app.addresses;");
+  my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @addresses);
+  Debug(q^Updating Addresses^, { person_id => $person_id, old => $person->{addresses}, new => \@addresses });
+  # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
+  $dbh->execute("DELETE FROM app.addresses wHERE person_id = ?;", $person_id);
   $dbh->execute("INSERT INTO app.addresses (person_id, order_id, type, address) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{type}, $_->{address} } @addresses);
-  $person->{addresses} = [map { { type => $_[0], address => $_[1] }; } $dbh->execute("SELECT type, address from app.addresses WHERE person_id = ? ORDER BY order_id", $person_id)];
+  $person->{addresses} = [map { { type => $_->[0], address => $_->[1] }; } $dbh->execute("SELECT type, address from app.addresses WHERE person_id = ? ORDER BY order_id", $person_id)];
+  return clean_person $person;
+}
+
+sub update_emails($dbh, $person_id, @emails) {
+  my $person = $cache{$person_id};
+  my $placeholders = join(', ', map { '(?, ?, ?)' } @emails);
+  Debug(q^Updating Emails^, { person_id => $person_id, old => $person->{emails}, new => \@emails });
+  # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
+  $dbh->execute("DELETE FROM app.contact_emails WHERE person_id = ?;", $person_id);
+  $dbh->execute("INSERT INTO app.contact_emails (person_id, order_id, email) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{email} } @emails);
+  $person->{emails} = [map { $_->[0] } $dbh->execute("SELECT email from app.contact_emails WHERE person_id = ? ORDER BY order_id", $person_id)];
+  return clean_person $person;
+}
+
+sub update_phones($dbh, $person_id, @phones) {
+  my $person = $cache{$person_id};
+  my $placeholders = join(', ', map { '(?, ?, ?, ?)' } @phones);
+  Debug(q^Updating Phones^, { person_id => $person_id, old => $person->{phones}, new => \@phones });
+  # This is bad because we don't have a transaction around it, so the delete could occur without the insert.
+  $dbh->execute("DELETE FROM app.contact_phones wHERE person_id = ?;", $person_id);
+  $dbh->execute("INSERT INTO app.contact_phones (person_id, order_id, type, number) VALUES $placeholders;", map { $person_id, $_->{order}, $_->{type}, $_->{number} } @phones);
+  $person->{phones} = [map { { type => $_->[0], number => $_->[1] }; } $dbh->execute("SELECT type, number from app.contact_phones WHERE person_id = ? ORDER BY order_id", $person_id)];
   return clean_person $person;
 }
 

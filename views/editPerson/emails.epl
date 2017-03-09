@@ -2,12 +2,13 @@
   <h1>Emails</h1>
   <form method="post">
     <ul id="person-email-list">
-    <%` for my $i (0 .. $#emails + 2) {
-      my $e;
+    <%` my $max = @emails + 2; for my $iv (1 .. $max) {
+      my ($e, $i);
+      $i = $iv - 1;
       if ($i < @emails) {
         $e = escape $emails[$i];
       } %>
-      <%- qq(<li><input type="email" name="email_$i", id="person-email-$i", value="$e" /></li>) %>
+      <%- qq(<li><input type="number" name="emails-$i-order" id="person-email-$i-order" value="$iv" min=1 max=$max /><input type="email" name="emails-$i-email", id="person-email-$i", value="$e" /></li>) %>
     <%` } %>
     </ul>
     <input type="submit" value="Save" />

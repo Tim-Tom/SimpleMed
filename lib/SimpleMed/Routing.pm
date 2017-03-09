@@ -107,7 +107,6 @@ sub build_routes() {
   use re 'eval';
   $Routes = qr/\A$Routes/s;
   $Routes_Dirty = 0;
-  say $Routes;
   Debug(q^Done Building Route Table^);
 }
 
@@ -126,7 +125,7 @@ sub route($req) {
       if ($route) {
         $route->($req);
       } else {
-        SimpleMed::Errror::Handle_Invalid_Method($req, sort keys %$routes);
+        SimpleMed::Error::Handle_Invalid_Method($req, sort keys %$routes);
       }
     } else {
       SimpleMed::Error::Handle_404($req);
