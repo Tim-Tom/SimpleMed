@@ -17,7 +17,7 @@ CREATE TABLE app.contact_emails (
 CREATE TABLE app.contact_phones (
     person_id INT         NOT NULL,
     order_id  INT         NOT NULL,
-    phone     VARCHAR(16) NOT NULL,
+    number    VARCHAR(16) NOT NULL,
     type      VARCHAR(50)     NULL,
     PRIMARY KEY (person_id, order_id),
     CONSTRAINT UK_person_id_phone UNIQUE (person_id, phone),

@@ -2,7 +2,6 @@
 
 BEGIN;
 
-
 DROP TABLE app.contact_emails;
 DROP TABLE app.contact_phones;
 DROP TABLE app.emergency_contacts;

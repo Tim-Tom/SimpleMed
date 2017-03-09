@@ -12,7 +12,7 @@ WHERE FALSE;
 SELECT
     person_id,
     order_id,
-    phone,
+    number,
     type
 FROM app.contact_phones
 WHERE FALSE;
