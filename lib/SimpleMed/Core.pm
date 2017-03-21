@@ -17,10 +17,13 @@ use SimpleMed::Core::User;
 use SimpleMed::Core::Person;
 use SimpleMed::Core::Insurer;
 
-sub LoadAll($dbh) {
+sub LoadAll {
   SimpleMed::Core::Insurer::load($dbh);
   SimpleMed::Core::Person::load($dbh);
   SimpleMed::Core::User::load($dbh);
+}
+
+sub DumpAll {
 }
 
 1;
