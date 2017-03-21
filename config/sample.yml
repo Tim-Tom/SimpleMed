@@ -35,18 +35,7 @@ static:
 
 # Database Information
 database:
-  driver: Pg
-  database: SimpleMed
-  host: localhost
-  username: simplemedapplication
-  password: password
-  # The maximum number of connections to hold open at any time
-  max_connections: 3
-  # The amount of time in seconds to leave a connection idle before closing it
-  connection_reap_threshold: 60
-  params:
-    exec_server: true
-    AutoCommit: true
+  filename: 'data.sereal'
 
 # Flags to control API serialization. Generally these are just configuration options to
 # enable human readable extensions to the APIs to make working with them less painful.
