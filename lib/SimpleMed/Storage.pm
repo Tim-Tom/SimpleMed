@@ -17,6 +17,7 @@ use Sereal::Decoder;
 use AnyEvent;
 use AnyEvent::IO;
 
+use File::Slurp qw(read_file);
 use Try::Tiny;
 
 use SimpleMed::Config qw(%Config);
@@ -34,6 +35,33 @@ sub new($class) {
     enqueued => []
   };
   return bless $self, $class;
+}
+
+# This method is currently synchronous and uses a bunch of memory. I'm evaluating doing
+# the pack myself, so don't want to spend to much time optimizing it.
+sub load($self) {
+  my $buffer =  read_file($self->{filename}, {binmode => ':raw' });
+  my $decoder = Sereal::Decoder->new();
+  my %frozen;
+  my $first_read = 1;
+  while($buffer) {
+    my ($size, $content) = unpack('NA*', $buffer);
+    die "Invalid read" if length($content) < $size;
+    ($content, $buffer) = unpack("A${size}A*", $content);
+    my %chunk = %{$decoder->decode($content)};
+    if ($first_read) {
+      %frozen = %chunk;
+      $first_read = 0;
+    } else {
+      while(my ($type, $updates) = each %chunk) {
+        @{$frozen{$type}}{keys %$updates} = values %$updates;
+      }
+    }
+  }
+  use Data::Printer;
+  p(%frozen);
+  my %thawed;
+  
 }
 
 sub full_dump($self, $data) {
@@ -96,7 +124,6 @@ sub _write($self) {
   }
 }
 
-use Data::Printer;
 sub _write_data($self, $data, @notify) {
   my $cv = AnyEvent->condvar;
   aio_write $self->{handle}, $data, sub($length=undef) {
