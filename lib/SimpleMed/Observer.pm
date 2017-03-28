@@ -15,6 +15,15 @@ use List::Util qw(any);
 
 use SimpleMed::Logger qw(:methods);
 
+use Exporter qw(import);
+
+our %EXPORT_TAGS = (
+  compare => [qw(compare_undef compare_integer compare_string compare_real_abs compare_real_rel compare_array)],
+  observe => [qw(observe_variable observe_integer observe_string observe_real_abs observe_real_rel observe_array)]
+);
+
+our @EXPORT_OK = map {@$_} values %EXPORT_TAGS;
+
 sub compare_undef($a, $b) {
   return defined($a) ? (defined($b) ? undef : 1) : (defined($b) ? 1 : 0);
 }
