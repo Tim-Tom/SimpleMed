@@ -17,9 +17,11 @@ use SimpleMed::Logger qw(:methods);
 
 use Exporter qw(import);
 
+use subs qw(compare_date);
+
 our %EXPORT_TAGS = (
-  compare => [qw(compare_undef compare_integer compare_string compare_real_abs compare_real_rel compare_array)],
-  observe => [qw(observe_variable observe_integer observe_string observe_real_abs observe_real_rel observe_array)]
+  compare => [qw(compare_undef compare_integer compare_string compare_date compare_real_abs compare_real_rel compare_array)],
+  observe => [qw(observe_variable observe_integer observe_string observe_date observe_real_abs observe_real_rel observe_array)]
 );
 
 our @EXPORT_OK = map {@$_} values %EXPORT_TAGS;
@@ -32,6 +34,13 @@ sub compare_integer($a, $b) {
   return compare_undef($a, $b) // $a != $b;
 }
 
+sub compare_string($a, $b) {
+  return compare_undef($a, $b) // $a ne $b;
+}
+
+# Alias compare date to compare integer.
+*compare_date = *compare_integer;
+
 sub compare_real_abs($a, $b, $t) {
   return compare_undef($a, $b) // abs($a - $b) > $t;
 }
@@ -41,10 +50,6 @@ sub compare_real_rel($a, $b, $r) {
   return $diff if defined $diff;
   my $m = abs($a) > abs($b) ? abs($a) : abs($b);
   return abs($a - $b) > $m*$r;
-}
-
-sub compare_string($a, $b) {
-  return compare_undef($a, $b) // $a ne $b;
 }
 
 sub compare_array($a, $b, $cmp) {
@@ -71,16 +76,20 @@ sub observe_integer($name) {
   return observe_variable($name, \&compare_integer);
 }
 
+sub observe_string($name) {
+  return observe_variable($name, \&compare_string);
+}
+
+sub observe_date($name) {
+  return observe_variable($name, \&compare_date);
+}
+
 sub observe_real_abs($name, $threshold=0.05) {
   return observe_variable($name, sub { push(@_, $threshold); goto &compare_real_abs });
 }
 
 sub observe_real_rel($name, $ratio=1e-6) {
   return observe_variable($name, sub { push(@_, $ratio); goto &compare_real_rel });
-}
-
-sub observe_string($name) {
-  return observe_variable($name, \&compare_string);
 }
 
 sub observe_array($name, $comparer) {

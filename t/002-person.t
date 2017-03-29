@@ -80,7 +80,7 @@ subtest 'Observation' => sub {
   diff_ok { $person->gender('Male');      } 'gender diff';
   same_ok { $person->gender('Male');      } 'gender same';
   diff_ok { $person->birth_date(Date::Simple::ymd(1970, 1, 1)); } 'birth_date set';
-  same_ok { $person->birth_date(Date::Simple->today); } 'birth_date diff - TODO';
+  diff_ok { $person->birth_date(Date::Simple->today); } 'birth_date diff';
   same_ok { $person->birth_date(Date::Simple->today); } 'birth_date same';
   diff_ok { $person->time_zone('America/New_York'); } 'time_zone diff';
   same_ok { $person->time_zone('America/New_York'); } 'time_zone same';

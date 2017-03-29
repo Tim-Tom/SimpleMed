@@ -52,8 +52,7 @@ has 'gender' => (
 has 'birth_date' => (
   is => 'rw',
   isa => 'Date::Simple',
-  # trigger => observe_date('birth_date')
-  trigger => observe_variable('birth_date', \&compare_undef)
+  trigger => observe_date('birth_date')
 );
 
 has 'time_zone' => (
