@@ -72,7 +72,7 @@ has 'addresses' => (
 has 'emails' => (
   is => 'rw',
   default => sub { [] },
-  trigger => observe_array('emails', \&compare_undef)
+  trigger => observe_array('emails', \&compare_string)
 );
 
 has 'phones' => (
