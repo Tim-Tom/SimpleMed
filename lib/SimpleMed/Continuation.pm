@@ -77,13 +77,20 @@ sub subcc : prototype(&) {
   return sub {
     local $SimpleMed::Logger::Logger = $logger;
     if ($Include_Trace) {
+      no warnings 'redefine';
       local *CORE::GLOBAL::caller = sub {
         my $height = $_[0] // 0;
         ++$height;
-        for (my $up = 1; $up <= $height; ++$up) {
+        # I could perhaps do this better by having up go exactly to $height and if our
+        # inner check passes when up = height, making a meta callframe that is partially
+        # our call and partially our callers. At the moment, we mention that we called the
+        # sub-function instead of saying our caller did. Since this is made for callbacks,
+        # I'm not sure it really matters since both are arbitrary stack frames. Plus if
+        # I'm called straight from XS, I don't know that I have a parent frame.
+        for (my $up = 1; $up < $height; ++$up) {
           my $test_caller = scalar CORE::caller($up);
           if ($test_caller && $test_caller eq __PACKAGE__) {
-            my $entry = $stack[$height - $up];
+            my $entry = $stack[$height - $up - 1];
             return unless $entry;
             if (CORE::caller() eq 'DB') {
               @DB::args = @{$entry->[1]};
