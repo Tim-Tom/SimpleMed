@@ -93,7 +93,6 @@ has 'insurer' => (
   trigger => observe_variable('insurer', \&compare_undef)
 );
 
-
 sub FREEZE($self) {
   my $frozen = {};
   for my $attr ($self->meta->get_all_attributes) {
@@ -115,20 +114,25 @@ sub THAW($class, $frozen) {
   for my $attr (__PACKAGE__->meta->get_all_attributes) {
     my $name = $attr->name;
     if ($name eq 'emergency_contacts') {
-      if (@{$frozen->{$name}}) {
+      if ($frozen->{$name} && @{$frozen->{$name}}) {
         $connectors{$name} = $frozen->{$name};
       }
     } elsif ($attr->name eq 'insurer') {
       # TODO: need insurer class
-    } else {
+    } elsif (defined $frozen->{$name}) {
       $args{$name} = $frozen->{$name};
     }
   }
-  return $class->new(\%args), %connectors ? \%connectors : undef;
+  return $class->new(%args), %connectors ? \%connectors : undef;
 }
 
 sub CONNECT($self, $connectors) {
-  # TODO: need global repository
+  if ($connectors->{emergency_contacts}) {
+    use SimpleMed::Core::Person;
+    $self->emergency_contacts([map { SimpleMed::Core::Person::find_by_id($_) } $connectors->{emergency_contacts}->@*]);
+  }
+  # TODO: Insurer
+  return $self;
 }
 
 no Moose;

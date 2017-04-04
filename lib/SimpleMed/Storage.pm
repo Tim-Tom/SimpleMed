@@ -37,6 +37,13 @@ sub new($class) {
   return bless $self, $class;
 }
 
+sub instance {
+  if (!$instance) {
+    $instance = __PACKAGE__->new();
+  }
+  return $instance;
+}
+
 # This method is currently synchronous and uses a bunch of memory. I'm evaluating doing
 # the pack myself, so don't want to spend to much time optimizing it.
 sub load($self) {
@@ -58,10 +65,7 @@ sub load($self) {
       }
     }
   }
-  use Data::Printer;
-  p(%frozen);
-  my %thawed;
-  
+  return \%frozen;
 }
 
 sub full_dump($self, $data) {
