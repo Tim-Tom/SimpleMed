@@ -5,6 +5,8 @@ use v5.24;
 use Moose;
 use Date::Simple;
 
+use Scalar::Util qw(blessed);
+
 use strict;
 use warnings;
 
@@ -90,6 +92,44 @@ has 'insurer' => (
   is => 'rw',
   trigger => observe_variable('insurer', \&compare_undef)
 );
+
+
+sub FREEZE($self) {
+  my $frozen = {};
+  for my $attr ($self->meta->get_all_attributes) {
+    if ($attr->name eq 'emergency_contacts') {
+      $frozen->{$attr->name} = [map { $_->id } @{$self->emergency_contacts}];
+    } else {
+      my $v = $attr->get_value($self);
+      if (defined $v && defined blessed($v) && $v->can('FREEZE')) {
+        $v = $v->FREEZE();
+      }
+      $frozen->{$attr->name} = $v;
+    }
+  }
+  return $frozen;
+}
+
+sub THAW($class, $frozen) {
+  my (%args, %connectors);
+  for my $attr (__PACKAGE__->meta->get_all_attributes) {
+    my $name = $attr->name;
+    if ($name eq 'emergency_contacts') {
+      if (@{$frozen->{$name}}) {
+        $connectors{$name} = $frozen->{$name};
+      }
+    } elsif ($attr->name eq 'insurer') {
+      # TODO: need insurer class
+    } else {
+      $args{$name} = $frozen->{$name};
+    }
+  }
+  return $class->new(\%args), %connectors ? \%connectors : undef;
+}
+
+sub CONNECT($self, $connectors) {
+  # TODO: need global repository
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
