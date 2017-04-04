@@ -16,7 +16,7 @@ use Try::Tiny;
 use SimpleMed::Core::Instance::Person;
 
 use SimpleMed::Core::User;
-use SimpleMed::Core::Person;
+use SimpleMed::Core::People;
 use SimpleMed::Core::Insurer;
 
 use SimpleMed::Storage;
@@ -27,7 +27,7 @@ sub LoadAll {
   my @connect;
   foreach my $frozen (values %{$frozen{'SimpleMed::Core::Instance::Person'}}) {
     my ($instance, $connectors) = SimpleMed::Core::Instance::Person->THAW($frozen);
-    SimpleMed::Core::Person::add($instance);
+    SimpleMed::Core::People::add($instance);
     if ($connectors) {
       push(@connect, [$instance, $connectors]);
     }
@@ -42,7 +42,7 @@ sub LoadAll {
 
 sub DumpAll {
   my %frozen;
-  foreach my $instance (values %SimpleMed::Core::Person::cache) {
+  foreach my $instance (values %SimpleMed::Core::People::cache) {
     $frozen{'SimpleMed::Core::Instance::Person'}{$instance->id} = $instance->FREEZE;
   }
   return SimpleMed::Storage::instance->full_dump(\%frozen);

@@ -16,7 +16,7 @@ use feature 'postderef';
 use Try::Tiny;
 
 use SimpleMed::Core::User;
-use SimpleMed::Core::Person;
+use SimpleMed::Core::People;
 
 sub check_session {
   # I don't really have security permissions in place right now. It's assumed everyone who
@@ -59,11 +59,11 @@ prefix '/users' => sub {
 
 prefix '/people' => sub {
   get '/' => sub {
-    return [SimpleMed::Core::Person::get()];
+    return [SimpleMed::Core::People::get()];
   };
   get '/:id' => sub {
     my $id = param('id');
-    my $result = SimpleMed::Core::Person::find_by_id($id);
+    my $result = SimpleMed::Core::People::find_by_id($id);
     if (!defined $result) {
       send_error('Person does not exist', 404);
     }

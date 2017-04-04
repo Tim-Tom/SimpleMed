@@ -128,8 +128,8 @@ sub THAW($class, $frozen) {
 
 sub CONNECT($self, $connectors) {
   if ($connectors->{emergency_contacts}) {
-    use SimpleMed::Core::Person;
-    $self->emergency_contacts([map { SimpleMed::Core::Person::find_by_id($_) } $connectors->{emergency_contacts}->@*]);
+    use SimpleMed::Core::People;
+    $self->emergency_contacts([map { SimpleMed::Core::People::find_by_id($_) } $connectors->{emergency_contacts}->@*]);
   }
   # TODO: Insurer
   return $self;

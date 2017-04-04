@@ -1,4 +1,4 @@
-package SimpleMed::Core::Person;
+package SimpleMed::Core::People;
 
 use v5.22;
 
