@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 use Test::Exception;
 
@@ -18,6 +18,7 @@ sub trace {
   while(my ($package, $filename, $line, $subroutine) = caller($i++)) {
     push(@stack, { sub => $subroutine, args => [@DB::args]});
   }
+  use Carp qw(confess);
   return \@stack;
 }
 
@@ -30,21 +31,27 @@ sub call_rec_after {
 }
 
 sub call_rec_before {
-  my $level = shift;
+  my ($level, $repeat, @args) = @_;
   if ($level == 1) {
-    return subcc \&call_rec_after;
+    if (!$repeat) {
+      return subcc \&call_rec_after;
+    } else {
+      return subcc \&call_rec_before;
+    }
   } else {
-    return call_rec_before($level - 1, map { $_ + 1 } @_);
+    return call_rec_before($level - 1, $repeat, map { $_ + 1 } @args);
   }
 }
 
 sub expected_stack {
-  my ($level, $bargs, $aargs) = @_;
+  my ($level, $repeat, $bargs, $aargs) = @_;
   my @expected;
-  my @bargs = @$bargs;
-  for my $x (reverse 1 .. $level) {
-    push(@expected, { args => [$x, @bargs], sub => "main::call_rec_before" });
-    @bargs = map { $_ + 1; } @bargs;
+  for my $rindex (reverse 0 .. $repeat - 1) {
+    my @bargs = @$bargs;
+    for my $lindex (reverse 1 .. $level) {
+      push(@expected, { args => [$lindex, $rindex, @bargs], sub => "main::call_rec_before" });
+      @bargs = map { $_ + 1; } @bargs;
+    }
   }
   my @aargs = @$aargs;
   while(@aargs) {
@@ -57,9 +64,13 @@ sub expected_stack {
 }
 
 sub check_stack {
-  my ($level, $bargs, $aargs) = @_;
-  my $result = call_rec_before($level, @$bargs)->(@$aargs);
-  my $expected = expected_stack($level, $bargs, $aargs);
+  my ($level, $repeat, $bargs, $aargs) = @_;
+  my $cb = \&call_rec_before;
+  for my $rindex (reverse 0 .. $repeat - 1) {
+    $cb = $cb->($level, $rindex, @$bargs);
+  }
+  my $result = $cb->(@$aargs);
+  my $expected = expected_stack($level, $repeat, $bargs, $aargs);
   while (pop(@$result)->{sub} ne 'main::check_stack') { };
   is_deeply($result, $expected, "call_rec: $level");
 }
@@ -67,6 +78,13 @@ sub check_stack {
 subtest recursive_stack => sub {
   plan tests => 10;
   for my $i (1 .. 10) {
-    check_stack($i, [1,2,3], [qw(a b c)]);
+    check_stack($i, 1, [1,2,3], [qw(a b c)]);
+  }
+};
+
+subtest callbacks_within_callbacks => sub {
+  plan tests => 10;
+  for my $i (1 .. 10) {
+    check_stack($i, 3, [1,2,3], [qw(a b c)]);
   }
 };
