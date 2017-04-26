@@ -16,6 +16,7 @@ use Sereal::Decoder;
 
 use AnyEvent;
 use AnyEvent::IO;
+use Promises qw(deferred);
 
 use File::Slurp qw(read_file);
 use Try::Tiny;
@@ -87,10 +88,10 @@ sub append($self, $data) {
 }
 
 sub _enqueue($self) {
-  my $cv = AnyEvent->condvar;
-  push(@{$self->{enqueued}}, $cv);
+  my $d = deferred;
+  push(@{$self->{enqueued}}, $d);
   $self->_write if $self->{write_open};
-  return $cv;
+  return $d;
 }
 
 sub _write($self) {
@@ -100,7 +101,7 @@ sub _write($self) {
   my $data = $self->{buffer};
   $self->{buffer} = '';
   if (!$self->{handle}) {
-    my $cv = AnyEvent->condvar;
+    my $d = deferred;
     my $type = AnyEvent::IO::O_CREAT | AnyEvent::IO::O_WRONLY;
     if ($self->{full_write}) {
       $type |= AnyEvent::IO::O_TRUNC;
@@ -109,17 +110,17 @@ sub _write($self) {
       $type |= AnyEvent::IO::O_APPEND;
     }
     aio_open $self->{filename}, $type, 0666, sub($fh=undef) {
-      return $cv->croak({ category => 'environment', message => "Unable to open transactional log '$self->{filename}' for append: $!" }) unless $fh;
-      return $cv->send($fh);
+      return $d->reject({ category => 'environment', message => "Unable to open transactional log '$self->{filename}' for append: $!" }) unless $fh;
+      return $d->resolve($fh);
     };
-    $cv->cb(sub {
+    $d->then(subcc sub($fh) {
       # Todo: Not handling errors yet.
       try {
-        $self->{handle} = $cv->recv;
+        $self->{handle} = $fh;
         $self->_write_data($data, @notify);
       } catch {
         foreach my $child (@notify) {
-          $child->croak($_);
+          $child->reject($_);
         }
       };
     });
@@ -129,21 +130,20 @@ sub _write($self) {
 }
 
 sub _write_data($self, $data, @notify) {
-  my $cv = AnyEvent->condvar;
+  my $d = deferred;
   aio_write $self->{handle}, $data, sub($length=undef) {
-    return $cv->croak({ category => 'environment', message => "Unable to write data to transactional log: $!" }) unless defined $length;
-    return $cv->croak({ category => 'environment', message => "Wrote  log: $!" }) unless $length == length $data;
-    return $cv->send();
+    return $d->reject({ category => 'environment', message => "Unable to write data to transactional log: $!" }) unless defined $length;
+    return $d->reject({ category => 'environment', message => "Wrote  log: $!" }) unless $length == length $data;
+    return $d->resolve();
   };
-  $cv->cb(sub {
+  $d->then(sub {
     try {
-      $cv->recv;
       foreach my $child (@notify) {
-        $child->send();
+        $child->resolve();
       };
     } catch {
       foreach my $child (@notify) {
-        $child->croak($_);
+        $child->reject($_);
       }
     };
     if (@{$self->{enqueued}}) {

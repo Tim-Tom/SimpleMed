@@ -17,6 +17,7 @@ use YAML::XS;
 
 use AnyEvent;
 use AnyEvent::IO;
+use Promises qw(decode collect);
 
 use Try::Tiny;
 
@@ -32,32 +33,28 @@ my %templates;
 sub read_template_pair($template_filename) {
   my $config_filename = $template_filename;
   $config_filename =~ s/\.\w+$/.yml/;
-  try {
-    my $template = read_template($template_filename)->recv;
-    my $config = read_config($config_filename)->recv;
-    return Template::EmbeddedPerl->new(filename => $template_filename, source => $template, config => $config, preamble => 'use strict;');
-  } catch {
-    if (ref) {
-      die $_;
-    } else {
-      die { category => 'environment', message => "Unable to reify template: $_" };
-    }
-  }
+  return collect (
+    read_template($template_filename),
+    read_config($config_filename)
+   )->then(subcc {
+     my ($template, $config) = @_;
+     Template::EmbeddedPerl->new(filename => $template_filename, source => $template, config => $config, preamble => 'use strict;');
+   });
 }
 
 sub read_template($filename) {
-  my $template_read = AnyEvent->condvar;
+  my $template_read = deferred;
   aio_stat $filename, sub($success=undef) {
-    return $template_read->croak({ category => 'environment', message => "Unable to find template $filename" }) unless $success;
+    return $template_read->reject({ category => 'environment', message => "Unable to find template $filename" }) unless $success;
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
-      return $template_read->croak({ category => 'environment', message => "Unable to open template $filename for read: $!" }) unless $in;
+      return $template_read->reject({ category => 'environment', message => "Unable to open template $filename for read: $!" }) unless $in;
       aio_read $in, $length, sub($data) {
         try {
           $in->close();
-          $template_read->send(decode_utf8($data));
+          $template_read->resolve(decode_utf8($data));
         } catch {
-          $template_read->croak({ category => 'environment', message => "Unable to decodetemplate $filename: $_"});
+          $template_read->reject({ category => 'environment', message => "Unable to decodetemplate $filename: $_"});
         }
       };
     };
@@ -66,20 +63,20 @@ sub read_template($filename) {
 }
 
 sub read_config($filename) {
-  my $config_read = AnyEvent->condvar;
+  my $config_read = deferred;
   aio_stat $filename, sub($success=undef) {
-    return $config_read->croak({ category => 'environment', message => "Unable to find template configuration $filename" }) unless $success;
+    return $config_read->reject({ category => 'environment', message => "Unable to find template configuration $filename" }) unless $success;
     my $length = -s _;
     aio_open $filename, AnyEvent::IO::O_RDONLY, 0, sub($in) {
-      return $config_read->croak({ category => 'environment', message => "Unable to open template configuration $filename for read: $!" }) unless $in;
+      return $config_read->reject({ category => 'environment', message => "Unable to open template configuration $filename for read: $!" }) unless $in;
       aio_read $in, $length, sub($data) {
         try {
           $in->close();
           my $config = YAML::XS::Load(decode_utf8($data));
           $config->{package} ||= 'SimpleMed::Views';
-          $config_read->send($config);
+          $config_read->resolve($config);
         } catch {
-          $config_read->croak({ category => 'environment', message => "Unable to parse template configuration $filename: $_" });
+          $config_read->reject({ category => 'environment', message => "Unable to parse template configuration $filename: $_" });
         };
       };
     };
@@ -88,18 +85,20 @@ sub read_config($filename) {
 }
 
 sub get_template($template) {
+  my $d = deferred;
   unless ($Config{template}{caching} && $templates{$template}) {
     Debug(q^0010^, { template => $template });
     $templates{$template} = read_template_pair("$Config{server}{views}/$template.epl");
     Debug(q^0011^, { template => $template });
   } else {
+    $d->resolve($templates{$template});
     Debug(q^0012^, { template => $template });
   }
-  return $templates{$template};
+  return $d;
 }
 
 sub template($template, $data) {
-  return get_template($template)->fill_in($data);
+  return get_template($template)->then(subcc sub($t) { $t->fill_in($data) });
 }
 
 1;
