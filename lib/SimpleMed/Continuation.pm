@@ -28,24 +28,6 @@ BEGIN {
   }
 }
 
-# We have to increase the height by 1 to skip over this function. Because caller has a
-# different return depending on if you pass an argument to it, we can't just pass the
-# result through, we have to manipulate the result.
-sub _normal_caller : prototype(;$) {
-  my $height = shift // 0;
-  ++$height;
-  my @caller = CORE::caller($height);
-  if ( CORE::caller() eq 'DB' ) {
-    # Oops, redo picking up @DB::args
-    package DB;
-    @caller = CORE::caller($height);
-  }
-
-  return if ! @caller;                  # empty
-  return $caller[0] if ! wantarray;     # scalar context
-  return @_ ? @caller : @caller[0..2];  # extra info or regular
-}
-
 use SimpleMed::Logger;
 
 sub subcc : prototype(&) {
