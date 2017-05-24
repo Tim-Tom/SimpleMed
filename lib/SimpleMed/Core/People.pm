@@ -15,6 +15,8 @@ use SimpleMed::Core::Insurer;
 use SimpleMed::Common qw(clone omit);
 use SimpleMed::Logger qw(:methods);
 
+use SimpleMed::Core::Instance::Person;
+
 our %cache;
 my $max_id;
 

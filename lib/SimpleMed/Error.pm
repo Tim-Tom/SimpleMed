@@ -16,6 +16,7 @@ use YAML::XS;
 
 use SimpleMed::Config qw(%Config);
 use SimpleMed::Template;
+use SimpleMed::Continuation;
 
 use Unicode::UTF8 qw(encode_utf8);
 
@@ -112,8 +113,10 @@ sub Handle_Invalid_Method($req, @possible_methods) {
 }
 
 sub send_error_template($req, $error) {
-  my $content = encode_utf8(SimpleMed::Template::template('layouts/error', $error));
-  $req->send_response($error->{code}, ['Content-Type' => 'text/html; charset=utf-8'], $content);
+  SimpleMed::Template::template('layouts/error', $error)->then(subcc sub($content) {
+    my $encoded = encode_utf8($content);
+    $req->send_response($error->{code}, ['Content-Type' => 'text/html; charset=utf-8'], $encoded);
+  });
 }
 
 sub send_error_yaml($req, $error) {

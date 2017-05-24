@@ -3,27 +3,27 @@
   <table id="person-details-table">
     <tr>
       <th>First Name</th>
-      <td><%= $first_name %></td>
+      <td><%= $person->first_name %></td>
     </tr>
     <tr>
       <th>Middle Name</th>
-      <td><%= $middle_name %></td>
+      <td><%= $person->middle_name %></td>
     </tr>
     <tr>
       <th>Last Name</th>
-      <td><%= $last_name %></td>
+      <td><%= $person->last_name %></td>
     </tr>
     <tr>
       <th>Gender</th>
-      <td><%= $gender %> </td>
+      <td><%= $person->gender %> </td>
     </tr>
     <tr>
       <th>Birth Date</th>
-      <td><%= $birth_date %></td>
+      <td><%= $person->birth_date %></td>
     </tr>
     <tr>
       <th>Time Zone</th>
-      <td><%= $time_zone %></td>
+      <td><%= $person->time_zone %></td>
     </tr>
   </table>
 </div>
@@ -31,10 +31,10 @@
 <div id="person-address">
   <h1>Addresses</h1>
   <table id="person-address-table">
-  <%` for my $address (@addresses) { %>
+  <%` for my $address (@{$person->addresses}) { %>
     <tr>
-      <th><%= $address->{type} %></th>
-      <td><%= $address->{address} %></td>
+      <th><%= $address->type %></th>
+      <td><%= $address->address %></td>
     </tr>
   <%` } %>
   </table>
@@ -43,10 +43,10 @@
 <div id="person-phone">
   <h1>Phone Numbers</h1>
   <table id="person-phone-table">
-  <%` for my $phone (@phones) { %>
+  <%` for my $phone (@{$person->phones}) { %>
     <tr>
-      <th><%= $phone->{type} %></th>
-      <td><a href="tel:<%= $phone->{number} %>"><%= $phone->{number} %></a></td>
+      <th><%= $phone->type %></th>
+      <td><a href="tel:<%= $phone->number %>"><%= $phone->number %></a></td>
     </tr>
   <%` } %>
   </table>
@@ -55,7 +55,7 @@
 <div id="person-email">
   <h1>Emails</h1>
   <ul id="person-email-list">
-  <%` for my $email (@emails) { %>
+  <%` for my $email (@{$person->emails}) { %>
     <li><a href="mailto:<%- $email %>"><%= $email %></a></li>
   <%` } %>
   </ul>
@@ -71,13 +71,13 @@
       <th>Email</th>
       <th>Phone</th>
     </tr>
-  <%` for my $person (@emergency_contacts) { %>
+  <%` for my $person (@{$person->emergency_contacts}) { %>
     <tr>
-      <td><a href="/people/<%- $person->{person_id} %>">Info</a></td>
-      <td><%= $person->{relationship} %></td>
-      <td><%= "$person->{first_name} $person->{last_name}" %></td>
-      <td><%- if ($person->{emails} && @{$person->{emails}} > 0) { my $e = $person->{emails}[0]; qq(<a href="mailto:$e">$e</a>) } else { '-' } %></td>
-      <td><%- if ($person->{phones} && @{$person->{phones}} > 0) { my $p = $person->{phones}[0]{number}; qq(<a href="tel:$p">$p</a>) } else { '-' } %></td>
+      <td><a href="/people/<%- $person->person_id %>">Info</a></td>
+      <td><%= $person->relationship %></td>
+      <td><%= "$person->first_name $person->last_name" %></td>
+      <td><%- my @e = @{$person->emails}; if (@e > 0) { my $e = $e[0]; qq(<a href="mailto:$e">$e</a>) } else { '-' } %></td>
+      <td><%- my @p = @{$person->phones}; if (@p > 0) { my $p = $p[0]{number}; qq(<a href="tel:$p">$p</a>) } else { '-' } %></td>
     </tr>
   <%` } %>
   </table>
@@ -88,23 +88,23 @@
   <table id="person-insurance-table">
     <tr>
       <th>Company</th>
-      <td><%= $insurer{company} %></td>
+      <td><%= '' %></td>
     </tr>
     <tr>
       <th>Membership Number</th>
-      <td><%= $insurer{number} %></td>
+      <td><%= '' %></td>
     </tr>
     <tr>
       <th>Phone</th>
-      <td><%= $insurer{phone} %></td>
+      <td><%= '' %></td>
     </tr>
     <tr>
       <th>Address</th>
-      <td><%= $insurer{address} %></td>
+      <td><%= '' %></td>
     </tr>
     <tr>
       <th>Notes</th>
-      <td><%= $insurer{notes} %></td>
+      <td><%= '' %></td>
     </tr>
   </table>
 </div>

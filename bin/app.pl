@@ -38,13 +38,21 @@ use SimpleMed::Logger qw(:methods);
 use SimpleMed;
 use SimpleMed::Core;
 use SimpleMed::Routing;
-use SimpleMed::DatabasePool;
 use SimpleMed::Views;
+use SimpleMed::Continuation;
 
-{
-  my $conn = SimpleMed::DatabasePool::AcquireConnection();
-  SimpleMed::Core::LoadAll($conn);
+if (exists $SimpleMed::Config::Config{continuations} && $SimpleMed::Config::Config{continuations}{tracing}) {
+  my $trace = $SimpleMed::Config::Config{continuations}{tracing};
+  $SimpleMed::Continuation::Include_Trace = 1;
+  if ($trace eq 'args') {
+    $SimpleMed::Continuation::Include_Trace_Args = 1;
+  } elsif ($trace eq 'args_real') {
+    $SimpleMed::Continuation::Include_Trace_Args = 1;
+    $SimpleMed::Continuation::Include_Trace_Args_Real = 1;
+  }
 }
+
+SimpleMed::Core::LoadAll();
 
 SimpleMed::Routing::build_routes;
 

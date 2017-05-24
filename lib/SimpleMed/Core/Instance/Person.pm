@@ -82,29 +82,30 @@ has 'phones' => (
   trigger => observe_array('phones', \&compare_undef)
 );
 
-has 'emergency_contacts' => (
+has 'emergency_contact_ids' => (
   is => 'rw',
   default => sub { [] },
-  trigger => observe_array('emergency_contacts', \&compare_undef)
+  trigger => observe_array('emergency_contacts', \&compare_integer)
 );
 
 has 'insurer' => (
   is => 'rw',
   trigger => observe_variable('insurer', \&compare_undef)
-);
+ );
+
+sub emergency_contacts($self) {
+  use SimpleMed::Core::People;
+  return [map { SimpleMed::Core::People::find_by_id($_) } $self->{emergency_contact_ids}->@*];
+}
 
 sub FREEZE($self) {
   my $frozen = {};
   for my $attr ($self->meta->get_all_attributes) {
-    if ($attr->name eq 'emergency_contacts') {
-      $frozen->{$attr->name} = [map { $_->id } @{$self->emergency_contacts}];
-    } else {
-      my $v = $attr->get_value($self);
-      if (defined $v && defined blessed($v) && $v->can('FREEZE')) {
-        $v = $v->FREEZE();
-      }
-      $frozen->{$attr->name} = $v;
+    my $v = $attr->get_value($self);
+    if (defined $v && defined blessed($v) && $v->can('FREEZE')) {
+      $v = $v->FREEZE();
     }
+    $frozen->{$attr->name} = $v;
   }
   return $frozen;
 }
@@ -113,11 +114,7 @@ sub THAW($class, $frozen) {
   my (%args, %connectors);
   for my $attr (__PACKAGE__->meta->get_all_attributes) {
     my $name = $attr->name;
-    if ($name eq 'emergency_contacts') {
-      if ($frozen->{$name} && @{$frozen->{$name}}) {
-        $connectors{$name} = $frozen->{$name};
-      }
-    } elsif ($attr->name eq 'insurer') {
+    if ($attr->name eq 'insurer') {
       # TODO: need insurer class
     } elsif (defined $frozen->{$name}) {
       $args{$name} = $frozen->{$name};
@@ -127,10 +124,6 @@ sub THAW($class, $frozen) {
 }
 
 sub CONNECT($self, $connectors) {
-  if ($connectors->{emergency_contacts}) {
-    use SimpleMed::Core::People;
-    $self->emergency_contacts([map { SimpleMed::Core::People::find_by_id($_) } $connectors->{emergency_contacts}->@*]);
-  }
   # TODO: Insurer
   return $self;
 }

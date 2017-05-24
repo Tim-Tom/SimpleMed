@@ -22,6 +22,7 @@ use File::Slurp qw(read_file);
 use Try::Tiny;
 
 use SimpleMed::Config qw(%Config);
+use SimpleMed::Continuation;
 
 our $instance;
 

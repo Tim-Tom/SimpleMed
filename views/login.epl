@@ -1,4 +1,4 @@
-<%- template('partials/banner', %variables); %>
+<%- template_strict('partials/banner', %variables); %>
 <div id="login-form">
   <form action="/login" method="POST">
     Username: <input type="text" name="username" value="<%= $username %>" />

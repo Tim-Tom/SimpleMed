@@ -6,7 +6,7 @@ use strict;
 use feature 'signatures';
 use feature 'postderef';
 
-use SimpleMed::Template qw(get_template template);
+use SimpleMed::Template qw(get_template_strict template_strict);
 
 use HTML::Entities qw();
 

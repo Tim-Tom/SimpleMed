@@ -56,11 +56,8 @@ get '/people' => req_login sub($req) {
 };
 
 get '/people/new' => req_login sub($req) {
-  my $result = {
-    person_id => 'new',
-    time_zone => 'America/Los_Angeles'
-   };
-  template($req, 'editPerson/details', $result);
+  my $result = SimpleMed::Core::Person->new(id => 0, first_name => '', last_name => '');
+  template($req, 'editPerson/details', { person => $result });
 };
 
 get '/people/:id' => req_login sub($req, $id) {
@@ -68,7 +65,7 @@ get '/people/:id' => req_login sub($req, $id) {
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, 'person', $result);
+  template($req, 'person', { person => $result });
 };
 
 get '/people/:id/editDetails' => req_login sub($req, $id) {

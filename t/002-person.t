@@ -60,11 +60,11 @@ subtest 'Person Valid' => sub {
   ok(!defined $person->gender, 'gender not set');
   ok(!defined $person->birth_date, 'birth date not set');
   is($person->time_zone, 'America/Los_Angeles', 'time zone defaulted');
-  is(scalar @{$person->{addresses}}, 0, 'addresses empty');
-  is(scalar @{$person->{emails}}, 0, 'emails empty');
-  is(scalar @{$person->{phones}}, 0, 'phones empty');
-  is(scalar @{$person->{emergency_contacts}}, 0, 'emergency_contacts empty');
-  ok(!defined $person->{insurer}, 'insurer not set');
+  is(scalar @{$person->addresses}, 0, 'addresses empty');
+  is(scalar @{$person->emails}, 0, 'emails empty');
+  is(scalar @{$person->phones}, 0, 'phones empty');
+  is(scalar @{$person->emergency_contacts}, 0, 'emergency_contacts empty');
+  ok(!defined $person->insurer, 'insurer not set');
 };
 
 subtest 'Observation' => sub {

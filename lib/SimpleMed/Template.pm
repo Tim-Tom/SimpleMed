@@ -17,16 +17,18 @@ use YAML::XS;
 
 use AnyEvent;
 use AnyEvent::IO;
-use Promises qw(decode collect);
+use Promises qw(deferred collect);
 
 use Try::Tiny;
 
 use SimpleMed::Config qw(%Config);
 use SimpleMed::Logger qw(:methods);
 
+use SimpleMed::Continuation;
+
 use Exporter qw(import);
 
-our @EXPORT_OK = qw(get_template template);
+our @EXPORT_OK = qw(get_template template get_template_strict template_strict);
 
 my %templates;
 
@@ -37,7 +39,7 @@ sub read_template_pair($template_filename) {
     read_template($template_filename),
     read_config($config_filename)
    )->then(subcc {
-     my ($template, $config) = @_;
+     my ($template, $config) = map { $_->[0] } @_;
      Template::EmbeddedPerl->new(filename => $template_filename, source => $template, config => $config, preamble => 'use strict;');
    });
 }
@@ -54,7 +56,7 @@ sub read_template($filename) {
           $in->close();
           $template_read->resolve(decode_utf8($data));
         } catch {
-          $template_read->reject({ category => 'environment', message => "Unable to decodetemplate $filename: $_"});
+          $template_read->reject({ category => 'environment', message => "Unable to decode template $filename: $_"});
         }
       };
     };
@@ -74,7 +76,11 @@ sub read_config($filename) {
           $in->close();
           my $config = YAML::XS::Load(decode_utf8($data));
           $config->{package} ||= 'SimpleMed::Views';
-          $config_read->resolve($config);
+          if ($config->{children} && @{$config->children}) {
+            collect(map { get_template($_) } @{$config->{children}})->then(sub { $config_read->resolve($config) });
+          } else {
+            $config_read->resolve($config);
+          }
         } catch {
           $config_read->reject({ category => 'environment', message => "Unable to parse template configuration $filename: $_" });
         };
@@ -88,8 +94,10 @@ sub get_template($template) {
   my $d = deferred;
   unless ($Config{template}{caching} && $templates{$template}) {
     Debug(q^0010^, { template => $template });
-    $templates{$template} = read_template_pair("$Config{server}{views}/$template.epl");
-    Debug(q^0011^, { template => $template });
+    $d = $templates{$template} = read_template_pair("$Config{server}{views}/$template.epl")->then(subcc {
+     Debug(q^0011^, { template => $template });
+     return @_;
+   });
   } else {
     $d->resolve($templates{$template});
     Debug(q^0012^, { template => $template });
@@ -99,6 +107,20 @@ sub get_template($template) {
 
 sub template($template, $data) {
   return get_template($template)->then(subcc sub($t) { $t->fill_in($data) });
+}
+
+sub get_template_strict($template) {
+  if (!exists $templates{$template} || $templates{$template}->is_in_progress) {
+    die "Template $template has not been realized.";
+  }
+  if ($templates{$template}->is_rejected) {
+    die ${ $templates{$template}->result }[0];
+  }
+  return ${ $templates{$template}->result }[0];
+}
+
+sub template_strict($template, $data) {
+  return get_template_strict($template)->fill_in($data);
 }
 
 1;

@@ -17,9 +17,11 @@ use WWW::Form::UrlEncoded qw(build_urlencoded);
 use Unicode::UTF8 qw(encode_utf8);
 
 use Try::Tiny;
+use Promises qw(collect);
 
 use SimpleMed::Template;
 use SimpleMed::Logger qw(:methods);
+use SimpleMed::Continuation;
 use SimpleMed::Error;
 
 use Exporter qw(import);
@@ -107,7 +109,7 @@ sub build_routes() {
   use re 'eval';
   $Routes = qr/\A$Routes/s;
   $Routes_Dirty = 0;
-  Debug(q^0015^);
+  Debug(q^0015^, { routes => $Routes });
 }
 
 sub route($req) {
@@ -146,10 +148,21 @@ sub redirect($req, $path, $params=undef) {
 }
 
 sub template($req, $template, $params=undef) {
-  my $inner_content = SimpleMed::Template::template($template, $params);
-  my $content = SimpleMed::Template::template('layouts/main', { content => $inner_content });
-  $content = encode_utf8($content);
-  $req->send_response(200, ['Content-Type' => 'text/html; charset=utf-8'], $content);
+  use Data::Printer;
+  my $d;
+  $d = collect(
+    SimpleMed::Template::template($template, $params),
+    SimpleMed::Template::get_template('layouts/main')
+  )->then(sub {
+    my ($inner_content, $layout) = map { $_->[0] } @_;
+    undef $d;
+    p($inner_content);
+    p($layout);
+    my $content = encode_utf8($layout->fill_in({ content => $inner_content }));
+    $req->send_response(200, ['Content-Type' => 'text/html; charset=utf-8'], $content);
+  })->catch(sub ($err) {
+    SimpleMed::Error::Handle_Error($req, $err);
+  });
 }
 
 sub param($req, @stuff) {

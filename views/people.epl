@@ -7,10 +7,10 @@
   </tr>
   <%` for my $person (@people) { %>
   <tr>
-    <td><a href="/people/<%- $person->{person_id} %>">Info</a></td>
-    <td><%= "$person->{first_name} $person->{last_name}" %></td>
-    <td><%- if ($person->{emails} && @{$person->{emails}} > 0) { my $e = $person->{emails}[0]; qq(<a href="mailto:$e">$e</a>) } else { '-' } %></td>
-    <td><%- if ($person->{phones} && @{$person->{phones}} > 0) { my $p = $person->{phones}[0]{number}; qq(<a href="tel:$p">$p</a>) } else { '-' } %></td>
+    <td><a href="/people/<%- $person->id %>">Info</a></td>
+    <td><%= $person->first_name . ' ' . $person->last_name %></td>
+    <td><%- my @e = @{$person->emails}; if (@e > 0) { my $e = $e[0]; qq(<a href="mailto:$e">$e</a>) } else { '-' } %></td>
+    <td><%- my @p = @{$person->phones}; if (@p > 0) { my $p = $p[0]{number}; qq(<a href="tel:$p">$p</a>) } else { '-' } %></td>
   </tr>
   <%` } %>
 </table>
