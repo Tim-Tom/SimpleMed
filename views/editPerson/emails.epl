@@ -13,6 +13,6 @@
     </ul>
     <input type="submit" value="Save" />
     <button type="reset" />Reset</button>
-    <a href="/people/<%- $person_id %>">Cancel</a>
+    <a href="/people/<%- $id %>">Cancel</a>
   </form>
 </div>

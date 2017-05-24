@@ -1,1 +1,3 @@
 variables: ['$person']
+unpack_func:
+  '$person': ['$first_name', '$middle_name', '$last_name', '$gender', '$birth_date', '$time_zone', '@addresses', '@phones', '@emergency_contacts', '@emails', '$insurer']

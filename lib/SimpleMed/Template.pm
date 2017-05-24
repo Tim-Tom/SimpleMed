@@ -91,18 +91,16 @@ sub read_config($filename) {
 }
 
 sub get_template($template) {
-  my $d = deferred;
   unless ($Config{template}{caching} && $templates{$template}) {
     Debug(q^0010^, { template => $template });
-    $d = $templates{$template} = read_template_pair("$Config{server}{views}/$template.epl")->then(subcc {
+    $templates{$template} = read_template_pair("$Config{server}{views}/$template.epl")->then(subcc {
      Debug(q^0011^, { template => $template });
      return @_;
    });
   } else {
-    $d->resolve($templates{$template});
     Debug(q^0012^, { template => $template });
   }
-  return $d;
+  return $templates{$template};
 }
 
 sub template($template, $data) {

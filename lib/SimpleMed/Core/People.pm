@@ -15,6 +15,8 @@ use SimpleMed::Core::Insurer;
 use SimpleMed::Common qw(clone omit);
 use SimpleMed::Logger qw(:methods);
 
+use Date::Simple;
+
 use SimpleMed::Core::Instance::Person;
 
 our %cache;
@@ -47,6 +49,9 @@ sub add($person) {
 
 sub create($new_person) {
   # TODO: Insurer & contacts?
+  if ($new_person->{birth_date}) {
+    $new_person->{birth_date} = Date::Simple->new($new_person->{birth_date});
+  }
   my $person = SimpleMed::Core::Instance::Person->new(%$new_person, id => ++$max_id);
   $cache{$person->id} = $person;
   return $person;

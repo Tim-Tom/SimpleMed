@@ -3,27 +3,27 @@
   <table id="person-details-table">
     <tr>
       <th>First Name</th>
-      <td><%= $person->first_name %></td>
+      <td><%= $first_name %></td>
     </tr>
     <tr>
       <th>Middle Name</th>
-      <td><%= $person->middle_name %></td>
+      <td><%= $middle_name %></td>
     </tr>
     <tr>
       <th>Last Name</th>
-      <td><%= $person->last_name %></td>
+      <td><%= $last_name %></td>
     </tr>
     <tr>
       <th>Gender</th>
-      <td><%= $person->gender %> </td>
+      <td><%= $gender %> </td>
     </tr>
     <tr>
       <th>Birth Date</th>
-      <td><%= $person->birth_date %></td>
+      <td><%= $birth_date %></td>
     </tr>
     <tr>
       <th>Time Zone</th>
-      <td><%= $person->time_zone %></td>
+      <td><%= $time_zone %></td>
     </tr>
   </table>
 </div>
@@ -31,7 +31,7 @@
 <div id="person-address">
   <h1>Addresses</h1>
   <table id="person-address-table">
-  <%` for my $address (@{$person->addresses}) { %>
+  <%` for my $address (@addresses) { %>
     <tr>
       <th><%= $address->type %></th>
       <td><%= $address->address %></td>
@@ -43,7 +43,7 @@
 <div id="person-phone">
   <h1>Phone Numbers</h1>
   <table id="person-phone-table">
-  <%` for my $phone (@{$person->phones}) { %>
+  <%` for my $phone (@phones) { %>
     <tr>
       <th><%= $phone->type %></th>
       <td><a href="tel:<%= $phone->number %>"><%= $phone->number %></a></td>
@@ -55,7 +55,7 @@
 <div id="person-email">
   <h1>Emails</h1>
   <ul id="person-email-list">
-  <%` for my $email (@{$person->emails}) { %>
+  <%` for my $email (@emails) { %>
     <li><a href="mailto:<%- $email %>"><%= $email %></a></li>
   <%` } %>
   </ul>
@@ -71,7 +71,7 @@
       <th>Email</th>
       <th>Phone</th>
     </tr>
-  <%` for my $person (@{$person->emergency_contacts}) { %>
+  <%` for my $person (@emergency_contacts) { %>
     <tr>
       <td><a href="/people/<%- $person->person_id %>">Info</a></td>
       <td><%= $person->relationship %></td>

@@ -1,1 +1,3 @@
-variables: ['@phones', '$person_id']
+variables: ['$person']
+unpack_func:
+  '$person': ['@phones', '$id']

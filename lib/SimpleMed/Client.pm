@@ -56,7 +56,7 @@ get '/people' => req_login sub($req) {
 };
 
 get '/people/new' => req_login sub($req) {
-  my $result = SimpleMed::Core::Person->new(id => 0, first_name => '', last_name => '');
+  my $result = SimpleMed::Core::Instance::Person->new(id => 0, first_name => '', last_name => '');
   template($req, 'editPerson/details', { person => $result });
 };
 
@@ -73,7 +73,7 @@ get '/people/:id/editDetails' => req_login sub($req, $id) {
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, 'editPerson/details', $result);
+  template($req, 'editPerson/details', {person => $result });
 };
 
 sub read_params_flat($req, @args) {
@@ -85,8 +85,8 @@ my @detail_keys = qw(first_name middle_name last_name gender birth_date time_zon
 post '/people/new' => req_login sub($req) {
   my ($new, $final);
   $new = $req->content;
-  $final = SimpleMed::Core::People::create(SimpleMed::DatabasePool::AcquireConnection(), $new);
-  redirect($req, '/people/' . $final->{person_id});
+  $final = SimpleMed::Core::People::create($new);
+  redirect($req, '/people/' . $final->id);
 };
 
 post '/people/:id/editDetails' => req_login sub($req, $id) {
@@ -102,7 +102,7 @@ post '/people/:id/editDetails' => req_login sub($req, $id) {
   } else {
     $final = $original;
   }
-  redirect($req, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editAddresses' => req_login sub($req, $id) {
@@ -110,7 +110,7 @@ get '/people/:id/editAddresses' => req_login sub($req, $id) {
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, 'editPerson/addresses', $result);
+  template($req, 'editPerson/addresses', { person => $result });
 };
 
 post '/people/:id/editAddresses' => req_login sub($req, $id) {
@@ -125,7 +125,7 @@ post '/people/:id/editAddresses' => req_login sub($req, $id) {
     die { code => 404, message => 'Person does not exist' };
   }
   my $final = SimpleMed::Core::People::update_addresses(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
-  redirect($req, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editEmails' => req_login sub($req, $id) {
@@ -133,7 +133,7 @@ get '/people/:id/editEmails' => req_login sub($req, $id) {
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, 'editPerson/emails', $result);
+  template($req, 'editPerson/emails', { person => $result });
 };
 
 post '/people/:id/editEmails' => req_login sub($req, $id) {
@@ -148,7 +148,7 @@ post '/people/:id/editEmails' => req_login sub($req, $id) {
     die { code => 404, message => 'Person does not exist' };
   }
   my $final = SimpleMed::Core::People::update_emails(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
-  redirect($req, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editPhones' => req_login sub($req, $id) {
@@ -156,7 +156,7 @@ get '/people/:id/editPhones' => req_login sub($req, $id) {
   if (!defined $result) {
     die { code => 404, message => 'Person does not exist' };
   }
-  template($req, 'editPerson/phones', $result);
+  template($req, 'editPerson/phones', { person => $result });
 };
 
 post '/people/:id/editPhones' => req_login sub($req, $id) {
@@ -171,7 +171,7 @@ post '/people/:id/editPhones' => req_login sub($req, $id) {
     die { code => 404, message => 'Person does not exist' };
   }
   my $final = SimpleMed::Core::People::update_phones(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
-  redirect($req, '/people/' . $final->{person_id});
+  redirect($req, '/people/' . $final->id);
 };
 
 

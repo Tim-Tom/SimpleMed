@@ -79,6 +79,21 @@ sub _setup_preamble {
         $self->{sub_text} .= "my $variable = \%{\$variables{$sigilless} || {}};\n"
       }
     }
+    if (exists $self->{config}{unpack_func}) {
+      while(my ($parent, $variables) = each $self->{config}{unpack_func}->%*) {
+        foreach my $variable ($variables->@*) {
+          my $sigil = substr($variable, 0, 1);
+          my $sigilless = substr($variable, 1);
+          if ($sigil eq '$') {
+            $self->{sub_text} .= "my $variable = $parent\->$sigilless();\n"
+          } elsif ($sigil eq '@') {
+            $self->{sub_text} .= "my $variable = \@{$parent\->$sigilless() || []};\n"
+          } elsif ($sigil eq '%') {
+            $self->{sub_text} .= "my $variable = \%{$parent\->$sigilless() || {}};\n"
+          }
+        }
+      }
+    }
   }
 }
 

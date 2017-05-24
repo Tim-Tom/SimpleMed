@@ -18,6 +18,8 @@ use SimpleMed::Config qw(%Config);
 use SimpleMed::Template;
 use SimpleMed::Continuation;
 
+use Scalar::Util qw(reftype);
+
 use Unicode::UTF8 qw(encode_utf8);
 
 my %default_summary = (
@@ -69,7 +71,7 @@ while(my ($k, $v) = each $jc->%*) {
 
 sub Handle_Error($req, $error) {
   my %error;
-  my $errType = ref($error);
+  my $errType = reftype($error);
   if ($errType) {
     if ($errType eq 'HASH') {
       %error = %{$error};

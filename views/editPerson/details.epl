@@ -38,9 +38,9 @@
               push(@tz, grep { my $tz = $_; !grep { $_ eq $tz } @tz; } DateTime::TimeZone->all_names);
               join("\n            ", map {
                 my $s = $_ eq $time_zone ? "selected" : "";
-                my $id = "person-details-time-zone-$_";
+                my $uid = "person-details-time-zone-$_";
                 $id =~ tr!/_!--!;
-                qq(<option value="$_" $s id="$id">$_</option>);
+                qq(<option value="$_" $s id="$uid">$_</option>);
               } @tz);
             %>
           </select>
@@ -49,6 +49,6 @@
     </table>
     <input type="submit" value="Save" />
     <button type="reset" />Reset</button>
-    <a href="<%- $person_id eq 'new' ? '/' : "/people/$person_id" %>">Cancel</a>
+    <a href="<%- $id == 0 ? '/' : "/people/$id" %>">Cancel</a>
   </form>
 </div>
