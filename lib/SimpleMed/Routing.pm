@@ -24,6 +24,8 @@ use SimpleMed::Logger qw(:methods);
 use SimpleMed::Continuation;
 use SimpleMed::Error;
 
+use Tie::IxHash;
+
 use Exporter qw(import);
 
 our %EXPORT_TAGS = (
@@ -35,10 +37,15 @@ our %EXPORT_TAGS = (
 our @EXPORT_OK = map {@$_} values %EXPORT_TAGS;
 
 our $Path_Prefix = '';
-our %Routes;
+tie our %Routes, 'Tie::IxHash';
 our @Routes;
 our $Routes;
 our $Routes_Dirty;
+
+sub ordered_hash {
+  tie my %anon, 'Tie::IxHash';
+  return \%anon;
+}
 
 sub prefix($path, $block) {
   local $Path_Prefix = $path;
@@ -58,7 +65,7 @@ sub add_handler($method, $path, $route) {
     if (s!^\\\/\\:(\w+)$!\\\/(?<$1>[^/]+)!) {
       push(@matches, $1);
     }
-    $map = ($map->{$_} //= {});
+    $map = ($map->{$_} //= ordered_hash);
   }
   unless (exists $map->{''}) {
     push(@Routes, {});
@@ -93,13 +100,12 @@ sub handle_route_key($k, $v) {
 }
 
 sub build_route_re($m) {
-  my %map = %$m;
-  my @keys = sort keys %map;
+  my @keys = keys %$m;
   if (@keys == 1) {
     my $key = $keys[0];
-    return handle_route_key($keys[0], $map{$keys[0]});
+    return handle_route_key($keys[0], $m->{$keys[0]});
   } else {
-    return '(?:' . join('|', map { handle_route_key($_, $map{$_}) } @keys) . ')';
+    return '(?:' . join('|', map { handle_route_key($_, $m->{$_}) } @keys) . ')';
   }
 }
 
@@ -109,7 +115,7 @@ sub build_routes() {
   use re 'eval';
   $Routes = qr/\A$Routes/s;
   $Routes_Dirty = 0;
-  Debug(q^0015^, { routes => $Routes });
+  Debug(q^0015^);
 }
 
 sub route($req) {
@@ -148,16 +154,11 @@ sub redirect($req, $path, $params=undef) {
 }
 
 sub template($req, $template, $params=undef) {
-  use Data::Printer;
-  my $d;
-  $d = collect(
+  collect(
     SimpleMed::Template::template($template, $params),
     SimpleMed::Template::get_template('layouts/main')
   )->then(sub {
     my ($inner_content, $layout) = map { $_->[0] } @_;
-    undef $d;
-    p($inner_content);
-    p($layout);
     my $content = encode_utf8($layout->fill_in({ content => $inner_content }));
     $req->send_response(200, ['Content-Type' => 'text/html; charset=utf-8'], $content);
   })->catch(sub ($err) {
