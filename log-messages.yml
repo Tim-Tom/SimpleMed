@@ -18,3 +18,6 @@
 '0017': Updating Addresses
 '0018': Updating Emails
 '0019': Updating Phones
+'0020': Received ambiguous date, treating as American
+'0021': Received two digit year. Handling Heuristically
+'0022': Attribute Changed

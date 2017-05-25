@@ -63,7 +63,7 @@ sub compare_array($a, $b, $cmp) {
 
 sub found_difference($self, $name, $before, $after) {
   # Plug into notifier.
-  Debug(q^Attribute Changed^, { class => ref($self), instance => $self->id, attribute => $name, before => $before, after => $after });
+  Debug(q^0022^, { class => ref($self), instance => $self->id, attribute => $name, before => $before, after => $after });
 }
 
 sub observe_variable($name, $comparer) {
