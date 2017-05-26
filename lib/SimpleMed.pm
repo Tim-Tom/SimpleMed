@@ -24,6 +24,7 @@ use SimpleMed::Request;
 use SimpleMed::Routing;
 use SimpleMed::StaticFile;
 use SimpleMed::Client;
+use SimpleMed::API;
 use SimpleMed::Error;
 
 sub Application($feer_req) {

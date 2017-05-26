@@ -1,11 +1,9 @@
 package SimpleMed::API;
 
-# TODO: Rework
+use v5.24;
 
 use strict;
 use warnings;
-
-use v5.22;
 
 no warnings 'experimental::signatures';
 use feature 'signatures';
@@ -15,60 +13,76 @@ use feature 'postderef';
 
 use Try::Tiny;
 
-use SimpleMed::Core::User;
-use SimpleMed::Core::People;
+use JSON;
+use YAML::XS;
 
-sub check_session {
-  # I don't really have security permissions in place right now. It's assumed everyone who
-  # has a session is an admin at this point and has access to all the data.
-  my $role = session('user_id');
-  if (!defined $role) {
-    send_error "Unauthorized", 401;
-  }
-  # elsif ...
-  # send_error "Insufficient Privledges", 403;
+use Unicode::UTF8 qw(encode_utf8);
+
+use SimpleMed::Config qw(%Config);
+use SimpleMed::Core;
+use SimpleMed::Routing qw(:methods :params);
+
+my $jc = $Config{serialization}{json};
+my $json_encoder = JSON->new();
+while(my ($k, $v) = each $jc->%*) {
+  $json_encoder->$k($v);
 }
 
-sub req_login {
-  my $route = shift;
-  return sub {
-    check_session();
-    $route->();
-  };
-}
+my %handlers = (
+  json => {
+    respond => sub($req, $code, $content) {
+      my $encoded = encode_utf8($json_encoder->encode($content));
+      $req->send_response($code, ['Content-Type' => 'application/json'], $encoded);
+    }
+  },
+  yaml => {
+    respond => sub($req, $code, $content) {
+      my $encoded = encode_utf8(YAML::XS::Dump($content));
+      $req->send_response($code, ['Content-Type' => 'text/yaml'], $encoded);
+    }
+  },
+);
 
-prefix '/users' => sub {
-  post '/login' => sub {
-    my $username = param('username');
-    my $password = param('password');
+for my $type (qw(json yaml)) {
+  my $pkg = $handlers{$type};
+  my $respond = $pkg->{respond};
+  prefix "/api/$type" => sub {
+    prefix '/users' => sub {
+      post '/login' => sub {
+        my $username = param('username');
+        my $password = param('password');
 
-    my $user;
-    try {
-      $user = SimpleMed::Core::User::login($username, $password);
-    } catch {
-      send_error($_->{message}, $_->{code});
+        my $user;
+        try {
+          $user = SimpleMed::Core::User::login($username, $password);
+        } catch {
+          send_error($_->{message}, $_->{code});
+        };
+
+        session( $_ => $user->{$_} ) foreach keys %$user;
+
+        $user->{session} = session()->{id};
+
+        return $user;
+      };
     };
 
-    session( $_ => $user->{$_} ) foreach keys %$user;
+    get '/people' => req_login sub($req) {
+      $respond->($req, 200, [SimpleMed::Core::People::get()]);
+    };
+    prefix '/people' => sub {
+      post '/new' => req_login sub($req, $id) {
+        $respond->($req, 200, SimpleMed::Core::People::create($req->content));
+      };
+      get '/:id' => req_login sub($req, $id) {
+        $respond->($req, 200, SimpleMed::Core::People::find_by_id($id));
+      };
+      put '/:id' => req_login sub($req, $id) {
+        $respond->($req, 200, SimpleMed::Core::People::update($id, $req->content));
+      };
+    };
 
-    $user->{session} = session()->{id};
-
-    return $user;
   };
-};
+}
 
-prefix '/people' => sub {
-  get '/' => sub {
-    return [SimpleMed::Core::People::get()];
-  };
-  get '/:id' => sub {
-    my $id = param('id');
-    my $result = SimpleMed::Core::People::find_by_id($id);
-    if (!defined $result) {
-      send_error('Person does not exist', 404);
-    }
-    return $result;
-  };
-};
-
-true;
+1;

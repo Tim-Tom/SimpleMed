@@ -29,7 +29,7 @@ use Tie::IxHash;
 use Exporter qw(import);
 
 our %EXPORT_TAGS = (
-  methods => [qw(get post put check_session req_login)],
+  methods => [qw(prefix get post put check_session req_login)],
   responses => [qw(forward redirect template)],
   params => [qw(param uparam session)]
 );
@@ -48,7 +48,7 @@ sub ordered_hash {
 }
 
 sub prefix($path, $block) {
-  local $Path_Prefix = $path;
+  local $Path_Prefix = $Path_Prefix . $path;
   $block->();
 }
 
