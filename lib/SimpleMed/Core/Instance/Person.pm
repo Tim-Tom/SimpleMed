@@ -35,8 +35,26 @@ package SimpleMed::Core::Instance::Person::Address {
    );
 };
 
+package SimpleMed::Core::Instance::Person::Phone {
+  use Moose;
+  has 'type' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1
+   );
+  has 'number' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1
+   );
+};
+
 sub compare_address($a, $b) {
   return compare_string($a->type, $b->type) // compare_string($a->address, $b->address);
+}
+
+sub compare_phone($a, $b) {
+  return compare_string($a->type, $b->type) // compare_string($a->number, $b->number);
 }
 
 
@@ -102,8 +120,9 @@ has 'emails' => (
 
 has 'phones' => (
   is => 'rw',
+  isa => 'ArrayRef[SimpleMed::Core::Instance::Person::Phone]',
   default => sub { [] },
-  trigger => observe_array('phones', \&compare_undef)
+  trigger => observe_array('phones', \&compare_phone)
 );
 
 has 'emergency_contact_ids' => (

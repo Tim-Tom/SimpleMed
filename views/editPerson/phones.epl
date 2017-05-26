@@ -11,7 +11,7 @@
       my ($t, $n, $i);
       $i = $iv - 1;
       if ($i < @phones) {
-        ($t, $n) = map { escape $phones[$i]{$_} } qw(type number);
+        ($t, $n) = map { escape $phones[$i]->$_() } qw(type number);
       } %>
       <tr>
         <td><%- qq(<input type="number" name="phones-$i-order" id="person-address-$i-order" value="$iv" min=1 max=$max />) %></td>
