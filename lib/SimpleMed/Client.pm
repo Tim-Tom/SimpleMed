@@ -97,7 +97,7 @@ get '/people/:id/editAddresses' => req_login sub($req, $id) {
 
 post '/people/:id/editAddresses' => req_login sub($req, $id) {
   my (@new, $final);
-  @new = map { SimpleMed::Core::Instance::Person::Address->new($_); } sort {
+  @new = sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;
@@ -129,7 +129,7 @@ get '/people/:id/editPhones' => req_login sub($req, $id) {
 
 post '/people/:id/editPhones' => req_login sub($req, $id) {
   my (@new, $final);
-  @new = map { SimpleMed::Core::Instance::Person::Phone->new($_); } sort {
+  @new = sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;

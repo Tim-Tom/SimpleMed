@@ -77,6 +77,6 @@ sub parse_date {
 class_type 'Date::Simple';
 coerce 'Date::Simple'
   => from 'Str'
-  => via sub { warn 'here!'; SimpleMed::Common::parse_date($_); };
+  => via sub { SimpleMed::Common::parse_date($_); };
 
 1;

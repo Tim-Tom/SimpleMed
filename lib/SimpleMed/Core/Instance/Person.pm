@@ -49,6 +49,22 @@ package SimpleMed::Core::Instance::Person::Phone {
    );
 };
 
+
+class_type 'SimpleMed::Core::Instance::Person::Address';
+subtype 'SimpleMed::Core::Instance::Person::AddressArray'
+  => as 'ArrayRef[SimpleMed::Core::Instance::Person::Address]';
+coerce 'SimpleMed::Core::Instance::Person::AddressArray'
+  => from 'ArrayRef[HashRef]'
+  => via sub { [map { SimpleMed::Core::Instance::Person::Address->new(%$_) } @$_]; };
+
+
+class_type 'SimpleMed::Core::Instance::Person::Phone';
+subtype 'SimpleMed::Core::Instance::Person::PhoneArray'
+  => as 'ArrayRef[SimpleMed::Core::Instance::Person::Phone]';
+coerce 'SimpleMed::Core::Instance::Person::PhoneArray'
+  => from 'ArrayRef[HashRef]'
+  => via sub { [map { SimpleMed::Core::Instance::Person::Phone->new($_) } @$_]; };
+
 sub compare_address($a, $b) {
   return compare_string($a->type, $b->type) // compare_string($a->address, $b->address);
 }
@@ -107,7 +123,8 @@ has 'time_zone' => (
 
 has 'addresses' => (
   is => 'rw',
-  isa => 'ArrayRef[SimpleMed::Core::Instance::Person::Address]',
+  isa => 'SimpleMed::Core::Instance::Person::AddressArray',
+  coerce => 1,
   default => sub { [] },
   trigger => observe_array('addresses', \&compare_address)
 );
@@ -120,7 +137,8 @@ has 'emails' => (
 
 has 'phones' => (
   is => 'rw',
-  isa => 'ArrayRef[SimpleMed::Core::Instance::Person::Phone]',
+  isa => 'SimpleMed::Core::Instance::Person::PhoneArray',
+  coerce => 1,
   default => sub { [] },
   trigger => observe_array('phones', \&compare_phone)
 );
