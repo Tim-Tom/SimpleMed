@@ -113,7 +113,7 @@ get '/people/:id/editEmails' => req_login sub($req, $id) {
 
 post '/people/:id/editEmails' => req_login sub($req, $id) {
   my (@new, $final);
-  @new = sort {
+  @new = map { $_->{email} } sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;
