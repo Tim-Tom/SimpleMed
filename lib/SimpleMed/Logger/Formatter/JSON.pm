@@ -15,6 +15,8 @@ use JSON;
 
 sub new($class, $args) {
   my $encoder = JSON->new();
+  $encoder->convert_blessed(1);
+  $encoder->allow_blessed(1);
   while(my ($k, $v) = each $args->%*) {
     next if $k eq 'class';
     $encoder->$k($v);
@@ -23,7 +25,7 @@ sub new($class, $args) {
 }
 
 sub format_data($self, $data) {
-  return $self->{encoder}->encode($data);
+  return $self->{encoder}->encode($data) . "\n";
 }
 
 1;

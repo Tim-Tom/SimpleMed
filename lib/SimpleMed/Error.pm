@@ -17,6 +17,7 @@ use YAML::XS;
 use SimpleMed::Config qw(%Config);
 use SimpleMed::Template;
 use SimpleMed::Continuation;
+use SimpleMed::Logger qw(:methods);
 
 use Scalar::Util qw(reftype);
 
@@ -76,7 +77,7 @@ sub Handle_Error($req, $error) {
     if ($errType eq 'HASH') {
       %error = %{$error};
     } else {
-      warn "Unable to handle warning of type $errType";
+      Error(q^Unable to handle error type^, { type => $errType, error => $error });
       %error = (
         code => 500,
         message => "An unknown error occured."
@@ -129,6 +130,23 @@ sub send_error_yaml($req, $error) {
 sub send_error_json($req, $error) {
   my $content = encode_utf8($json_encoder->encode($error));
   $req->send_response($error->{code}, ['Content-Type' => 'application/json'], $content);
+}
+
+package Devel::StackTrace {
+  sub TO_JSON($self) {
+    return [$self->frames];
+  }
+};
+
+package Devel::StackTrace::Frame {
+  sub TO_JSON($self) {
+    return {
+      package => $self->package(),
+      method => $self->subroutine(),
+      filename => $self->filename(),
+      line => $self->line()
+    };
+  }
 }
 
 1;
