@@ -2,6 +2,9 @@ package SimpleMed::Common;
 
 use strict;
 use warnings;
+use Moose::Util::TypeConstraints;
+
+use Date::Simple;
 
 use Try::Tiny;
 
@@ -70,5 +73,10 @@ sub parse_date {
   }
   return $date;
 }
+
+class_type 'Date::Simple';
+coerce 'Date::Simple'
+  => from 'Str'
+  => via sub { warn 'here!'; SimpleMed::Common::parse_date($_); };
 
 1;

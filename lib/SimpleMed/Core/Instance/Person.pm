@@ -3,6 +3,8 @@ package SimpleMed::Core::Instance::Person;
 use v5.24;
 
 use Moose;
+use Moose::Util::TypeConstraints;
+
 use Date::Simple;
 
 use Scalar::Util qw(blessed);
@@ -17,6 +19,26 @@ no warnings 'experimental::postderef';
 use feature 'postderef';
 
 use SimpleMed::Observer qw(:compare :observe);
+use SimpleMed::Common;
+
+package SimpleMed::Core::Instance::Person::Address {
+  use Moose;
+  has 'type' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1
+   );
+  has 'address' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1
+   );
+};
+
+sub compare_address($a, $b) {
+  return compare_string($a->type, $b->type) // compare_string($a->address, $b->address);
+}
+
 
 has 'id' => (
   is => 'ro',
@@ -54,6 +76,7 @@ has 'gender' => (
 has 'birth_date' => (
   is => 'rw',
   isa => 'Date::Simple',
+  coerce => 1,
   trigger => observe_date('birth_date')
 );
 
@@ -66,8 +89,9 @@ has 'time_zone' => (
 
 has 'addresses' => (
   is => 'rw',
+  isa => 'ArrayRef[SimpleMed::Core::Instance::Person::Address]',
   default => sub { [] },
-  trigger => observe_array('addresses', \&compare_undef)
+  trigger => observe_array('addresses', \&compare_address)
 );
 
 has 'emails' => (

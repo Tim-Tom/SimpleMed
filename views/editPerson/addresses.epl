@@ -11,7 +11,7 @@
       my ($t, $a, $i);
       $i = $iv - 1;
       if ($i < @addresses) {
-        ($t, $a) = map { escape $addresses[$i]->{$_} } qw(type address);
+        ($t, $a) = map { escape $addresses[$i]->$_() } qw(type address);
         $a =~ s!<br />!\n!g;
       } %>
       <tr>

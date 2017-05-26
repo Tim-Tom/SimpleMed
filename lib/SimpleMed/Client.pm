@@ -62,17 +62,11 @@ get '/people/new' => req_login sub($req) {
 
 get '/people/:id' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $result) {
-    die { code => 404, message => 'Person does not exist' };
-  }
   template($req, 'person', { person => $result });
 };
 
 get '/people/:id/editDetails' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $result) {
-    die { code => 404, message => 'Person does not exist' };
-  }
   template($req, 'editPerson/details', {person => $result });
 };
 
@@ -90,87 +84,57 @@ post '/people/new' => req_login sub($req) {
 };
 
 post '/people/:id/editDetails' => req_login sub($req, $id) {
-  my ($original, $new, $final);
+  my ($new, $final);
   $new = $req->content;
-  $original = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $original) {
-    die { code => 404, message => 'Person does not exist' };
-  }
-  my @d = diff($original, $new, @detail_keys);
-  if (@d) {
-    $final = SimpleMed::Core::People::update(SimpleMed::DatabasePool::AcquireConnection(), $id, $new, @d);
-  } else {
-    $final = $original;
-  }
+  $final = SimpleMed::Core::People::update($id, $new);
   redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editAddresses' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $result) {
-    die { code => 404, message => 'Person does not exist' };
-  }
   template($req, 'editPerson/addresses', { person => $result });
 };
 
 post '/people/:id/editAddresses' => req_login sub($req, $id) {
-  my ($original, $new, @final);
-  my @new = sort {
+  my (@new, $final);
+  @new = map { SimpleMed::Core::Instance::Person::Address->new($_); } sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;
   } grep { $_->{address} } @{$req->content->{addresses}};
-  $original = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $original) {
-    die { code => 404, message => 'Person does not exist' };
-  }
-  my $final = SimpleMed::Core::People::update_addresses(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
+  $final = SimpleMed::Core::People::update($id, { addresses => \@new });
   redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editEmails' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $result) {
-    die { code => 404, message => 'Person does not exist' };
-  }
   template($req, 'editPerson/emails', { person => $result });
 };
 
 post '/people/:id/editEmails' => req_login sub($req, $id) {
-  my ($original, $new, @final);
-  my @new = sort {
+  my (@new, $final);
+  @new = sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;
   } grep { $_->{email} } @{$req->content->{emails}};
-  $original = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $original) {
-    die { code => 404, message => 'Person does not exist' };
-  }
-  my $final = SimpleMed::Core::People::update_emails(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
+  $final = SimpleMed::Core::People::update($id, { emails => \@new });
   redirect($req, '/people/' . $final->id);
 };
 
 get '/people/:id/editPhones' => req_login sub($req, $id) {
   my $result = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $result) {
-    die { code => 404, message => 'Person does not exist' };
-  }
   template($req, 'editPerson/phones', { person => $result });
 };
 
 post '/people/:id/editPhones' => req_login sub($req, $id) {
-  my ($original, $new, @final);
-  my @new = sort {
+  my (@new, $final);
+  @new = sort {
     my $res = $a->{order} <=> $b->{order};
     die { code => 400, message => "Order $a->{order} was specified more than once" } if $res == 0;
     $res;
   } grep { $_->{number} } @{$req->content->{phones}};
-  $original = SimpleMed::Core::People::find_by_id($id);
-  if (!defined $original) {
-    die { code => 404, message => 'Person does not exist' };
-  }
-  my $final = SimpleMed::Core::People::update_phones(SimpleMed::DatabasePool::AcquireConnection(), $id, @new);
+  $final = SimpleMed::Core::People::update($id, { phones => \@new });
   redirect($req, '/people/' . $final->id);
 };
 
